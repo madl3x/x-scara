@@ -1,5 +1,4 @@
-![header](images/header.png)
-
+![header](images/Header.png)
 
 Bill of materials
 ===
