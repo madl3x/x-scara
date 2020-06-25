@@ -16,7 +16,7 @@ The *Hardware* section will contain everything you need to build **X-SCARA**, fr
 
 More details [here](hardware/README.md).
 
-Firrmware
+Firmware
 ===
 ![firmware logo](images/firmware.png)
 
