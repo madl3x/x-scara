@@ -36,7 +36,11 @@ Motors
 
 CAD
 ===
-For a complete preview of the frame model check this Autodesk Fusion 360 [shared link](https://a360.co/2YkuguU).
+For a complete preview of the the assemblies, visit these links:
+* [Complete arm assembly](https://a360.co/2YkuguU)
+* [Base arm assembly](https://a360.co/3c0eRo9)
+* [Shoulder assembly](https://a360.co/3dAIDj8)
+* [Elbow assembly](https://a360.co/2B50gKS)
 
 Printed parts
 ===
@@ -45,26 +49,26 @@ Printed parts
 | ---------------------------- | ----- | :-----------------------------------------------------------------: |
 | **BASE**                     |       |                                                                     |
 | Arm_Base_MotorPlate          <td> 2<td rowspan=2> ![sides](images/parts/Arm_Base_MotorPlate.png)           |
-| Arm_Base_ZPlate_Mid_NutHolder| 1     |
+| Arm_Base_ZPlate_Mid_NutHolder| 1     |                                                                     |
 | Arm_Base_ZHub_Top            <td> 1  <td rowspan=2> ![ZHub](images/parts/Arm_Base_ZHub.png)                |
-| Arm_Base_ZHub_Bottom         | 1     |
+| Arm_Base_ZHub_Bottom         | 1     |                                                                     |
 | **SHOULDER**                 |       |                                                                     |
 | Arm_Shoulder_Plate_Top       <td> 1<td rowspan=5> ![arm](images/parts/Arm_Shoulder.png)                    |
-| Arm_Shoulder_Plate_Bottom    | 1     |
-| Arm_SideWall_Left            | 1     |
-| Arm_SideWall_Right           | 1     |
-| Arm_Plates_Cover             | 1     |
+| Arm_Shoulder_Plate_Bottom    | 1     |                                                                     |
+| Arm_SideWall_Left            | 1     |                                                                     |
+| Arm_SideWall_Right           | 1     |                                                                     |
+| Arm_Plates_Cover             | 1     |                                                                     |
 | Arm_Shoulder_Connector       | 1     | ![connector](images/parts/Arm_Shoulder_Connector.png)               |
 | **ELBOW**                    |       |                                                                     |
 | Arm_Elbow_Plate_Top          <td> 1<td rowspan=5> ![arm](images/parts/Arm_Elbow.png)                       |
-| Arm_Elbow_Plate_Bottom       | 1     |
-| Arm_Elbow_RodHub             | 1     |
-| Arm_SideWall_Left            | 1     |
-| Arm_SideWall_Right           | 1     |
+| Arm_Elbow_Plate_Bottom       | 1     |                                                                     |
+| Arm_Elbow_RodHub             | 1     |                                                                     |
+| Arm_SideWall_Left            | 1     |                                                                     |
+| Arm_SideWall_Right           | 1     |                                                                     |
 | **E3D MOUNT**                |       |                                                                     |
 | Arm_EMount_Base_ABL          <td> 1<td rowspan=3> ![arm](images/parts/Arm_EMount.png)                      |
-| Arm_EMount_Base_Left         | 1     |
-| Arm_EMount_Fan               | 1     |
+| Arm_EMount_Base_Left         | 1     |                                                                     |
+| Arm_EMount_Fan               | 1     |                                                                     |
 
 
 Assembly
@@ -86,7 +90,7 @@ Stage 1 - Arm Base
 ===
 ![arm](images/Arm_Base.png) 
 
-The fully assembled base should look like this, when finished.
+## For a full preview of this assembly go [here](https://a360.co/3c0eRo9).
 
 Step 1 - Join the two Z-Plates
 ---
@@ -145,9 +149,9 @@ Step 4 - Attach the 6002 bearing and align belt components
 
 Stage 2 - Shoulder component
 ===
-
-Shoulder should look like this when finished
 ![shoulder](images/Arm_Shoulder.png)
+
+## For a full preview of this assembly go [here](https://a360.co/3dAIDj8).
 
 Step 1 - Install 3 x 608 bearings and the drive pulley
 ---
@@ -227,10 +231,11 @@ Step 10 - Install cover  (optional)
 
 Cover can be installed on the front of the shoulder arm, and as well on the back.
 
-
 Stage 3 - Elbow
 ===
 ![elbow](images/Arm_Elbow.png)
+
+## For a full preview of this assembly go [here](https://a360.co/2B50gKS).
 
 The hard part is gone. Now we need to assemble the elbow and the extruder mount. This is how it must look when finished.
 
