@@ -26,9 +26,9 @@ In cartesian mode **X-SCARA** will transform the X and Y coordinates to angular 
 
 This `M360 M1` command allows you to move either the shoulder, or the elbow to an angle you expect and observe the result, usign nothing but standard GCode commands. For example, after invoking `M360 M1` you can move the arm's shoulder to 0º using `G0 X0` or the elbow to 90º using `G0 Y90`.
 
-It is also useful to use some specialized software (like Repetier, Octoprint, Pronterface, etc.) to move the machine's joints to the desired position, using their own user-interface.
+It is also useful when using specialized software (like Repetier, Octoprint, Pronterface, etc.) to move the machine's joints to the desired angular position, using their friendly user-interface. 
 
-After you invoke `M360 M1` the machine will treat each later Gcode command, using X or Y coordinates, as angular positions. It applies to `G0`, `G1`, `G92` or others. It is not useful for regular printing, so after you test the machine, revert the coordinates back with `M360 M0`.
+After you invoke `M360 M1` the machine will treat each later Gcode command, using X or Y coordinates, as angular positions. It applies to `G0`, `G1`, `G92` and others. It is not intended for regular printing, so after you test the machine, revert the coordinates back with `M360 M0`.
 
 Examples:
 ```
@@ -45,7 +45,7 @@ Joints S:-34.99 E:100.00
 
 ok
 
-# change to angular mode (not how joints angle and X,Y are now egual)
+# change to angular mode (note how joints angle and X,Y are now egual)
 > M360 M1
 X:-34.99 Y:100.00 Z:30.00 E:0.00
 Motors A:-933 B:7067 Z:12000
@@ -55,7 +55,7 @@ Mode:1
 ok
 
 # G92 will report the same as M360
-G92
+> G92
 X:-34.99 Y:100.00 Z:30.00 E:0.00
 Motors A:-933 B:7067 Z:12000
 Joints S:-34.99 E:100.00
@@ -67,7 +67,7 @@ ok
 ok
 
 # change back to cartesian mode
-M360 M0
+> M360 M0
 X:-80.98 Y:-13.49 Z:30.00 E:0.00
 Motors A:-2400 B:5600 Z:12000
 Joints S:-90.00 E:100.00
@@ -141,7 +141,8 @@ M362 E0 S0
 ```
 This command tells the machine the current position is 0º angle for both shoulder and elbow joints. After that, you can move the machine safely in cartesian space.
 
-Same effect can be obtained using `G92` by changing the coordinate system to angular positioning, but implies combining more commands:
+Please note that the same effect can be obtained using `G92`, after changing the coordinate system to angular positioning. In contrast with using just `M362` this implies combining more commands, as follows:
+
 ```
 # X,Y are now angular positions 
 > M360 M1
