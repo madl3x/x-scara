@@ -14,7 +14,7 @@ You can use these shoulder and elbow screws for reference, to make sure the arm 
 
 Step 2 - Reset joints angle to 0º
 ---
-Using `M362` set both joints angle to 0º. For more information about `M362` read this [GCodes](firmware/GCodes.md) guide.
+Using `M362` set both joints angle to 0º. For more information about `M362` read this [GCodes](firmware/GCODES.md) guide.
 
 ```
 M362 E0 S0
