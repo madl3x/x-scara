@@ -14,7 +14,7 @@ Firmware
 ===
 ![firmware logo](images/firmware.png)
 
-    X-SCARA has published the first firmaware version, and the machine is ready to print!
+    X-SCARA has published the first firmware version, and the machine is ready to print!
 
 For firmware build and configuration follow the instructions [here](firmware/README.md).
 

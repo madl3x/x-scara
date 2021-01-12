@@ -1,7 +1,7 @@
 About
 ===
 
-Currently the firmware is in the alpha stage and its based on *Marlin 2.x* with modifications that applies specifically to the **X-SCARA** machine.
+Firmware is based on *Marlin 2.x* with modifications that applies specifically to the **X-SCARA** machine. The firmware is in alpha stage for the moment, but it's working and the machine is able to 3D print with no known problems.
 
 Build instructions
 ===

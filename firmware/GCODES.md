@@ -185,7 +185,7 @@ Modified Marlin GCodes
 G0/G1 - Move to destination
 ---
 
-**X-SCARA** uses `G0` command to move directly to destination (without intermittent moves) and `G1` command to move to destination using multiple segmented moves.
+**X-SCARA** uses the `G0` command to move directly to destination (without intermittent moves) and `G1` command to move to destination using multiple segmented moves.
 
 To configure the number of segments for each move, use `M665` command to set the number of segments per second and the `SCARA_SEGMENTS_PER_SECOND` configuration option to set the default value. 
 
@@ -196,7 +196,7 @@ G28 - Home axis
 
 **X-SCARA** will home the *Z axis* just like any other printer. 
 
-For the X and Y axis (currently) the firmware will set the home location in place, to the current machine position, without moving or checking endstops.
+For the X and Y axis (currently) the firmware will set the home location in place, to the current machine position, without moving or checking endstops. Make sure the machine si set to (0,0) before calling `G28` or `G28 XY`.
 
 M665 - Set X-SCARA settings
 ----
