@@ -33,7 +33,12 @@
 #include "planner.h"
 
 float delta_segments_per_second = SCARA_SEGMENTS_PER_SECOND;
-static constexpr xy_pos_t scara_offset = { SCARA_OFFSET_X, SCARA_OFFSET_Y };
+
+#if ENABLED(X_SCARA)
+  xy_pos_t scara_offset = { SCARA_OFFSET_X, SCARA_OFFSET_Y };
+#else
+  static constexpr xy_pos_t scara_offset = { SCARA_OFFSET_X, SCARA_OFFSET_Y };
+#endif
 
 /*
  * X-SCARA definitions 
@@ -106,10 +111,10 @@ void forward_kinematics_SCARA(const float &a, const float &b) {
     const float S = a;
     const float E = b-a/3;
 
-    const float a_sin = sin(RADIANS(S)) * L1,
-                a_cos = cos(RADIANS(S)) * L1,
-                b_sin = sin(RADIANS(S+E)) * L2,
-                b_cos = cos(RADIANS(S+E)) * L2;
+    const float a_sin = - sin(RADIANS(S)) * L1,
+                a_cos =   cos(RADIANS(S)) * L1,
+                b_sin = - sin(RADIANS(S+E)) * L2,
+                b_cos =   cos(RADIANS(S+E)) * L2;
 
     cartes.set(a_sin + b_sin + scara_offset.x,
                a_cos + b_cos + scara_offset.y); 
@@ -167,8 +172,8 @@ void inverse_kinematics(const xyz_pos_t &raw) {
    */
   if(x_scara_coordinates_mode == X_SCARA_COORDINATES_CARTESIAN) {
 
-    const float x = raw.x - scara_offset.x;
-    const float y = raw.y - scara_offset.y;
+    const float x = - (raw.x - scara_offset.x);
+    const float y =   (raw.y - scara_offset.y);
 
     float x2y2 = sq(x) + sq(y);
     float hypot = SQRT(x2y2);
@@ -261,17 +266,12 @@ void inverse_kinematics(const xyz_pos_t &raw) {
  */
 #ifdef X_SCARA
 
-bool x_scara_move_joints(ab_pos_t & pos) {
-  if (IsRunning()) {
+void x_scara_move_joints(ab_pos_t & pos) {
+  x_scara_relative_to_delta(pos);
+  forward_kinematics_SCARA(pos.a, pos.b);
+  x_scara_delta_to_relative(pos);
 
-    x_scara_relative_to_delta(pos);
-    forward_kinematics_SCARA(pos.a, pos.b);
-    x_scara_delta_to_relative(pos);
-
-    do_blocking_move_to_xy(cartes);
-    return true;
-  }
-  return false;
+  do_blocking_move_to_xy(cartes);
 }
 
 #endif // X_SCARA

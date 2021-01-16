@@ -50,8 +50,9 @@ void scara_report_positions();
     #define X_SCARA_DEBUG_LNPAIR(V...) 
   #endif
 
-  #define X_SCARA_VERSION_STR "0.1 Alpha"
+  #define X_SCARA_VERSION_STR "0.2 Alpha"
 
+  extern xy_pos_t scara_offset;
   
   enum X_SCARA_COORDINATES_MODE {
         X_SCARA_COORDINATES_CARTESIAN,
@@ -68,7 +69,7 @@ void scara_report_positions();
     angles.b -= angles.a/3;
   }
 
-  bool x_scara_move_joints(ab_pos_t & pos);
+  void x_scara_move_joints(ab_pos_t & pos);
 
 
 #endif // X_SCARA

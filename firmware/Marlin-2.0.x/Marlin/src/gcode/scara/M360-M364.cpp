@@ -38,8 +38,8 @@
 #include "../../MarlinCore.h" // for isRunning
 
 FORCE_INLINE static bool _check_if_running() {
-  if (printingIsActive()) {
-    SERIAL_ECHOLNPGM("Scara is printing!");
+  if (!IsRunning()) {
+    SERIAL_ECHOLNPGM("X-Scara is not running!");
     return true;
   }
   return false;
@@ -135,11 +135,7 @@ void GcodeSuite::M361() {
   if (cur_pos != pos)
   {
       if (_check_if_running()) return;
-
-      if (!x_scara_move_joints(pos)) {
-        SERIAL_ECHOLN("busy");
-        return;
-      }
+      x_scara_move_joints(pos);
   }
   
   SERIAL_ECHOLNPAIR(
