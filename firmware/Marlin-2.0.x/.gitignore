@@ -23,7 +23,6 @@
 # NEVER put it in the repository
 _Version.h
 
-platformio.ini
 process-palette.json
 .pio/
 
