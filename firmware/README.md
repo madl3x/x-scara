@@ -7,6 +7,10 @@ Build instructions
 ===
 Use [this guide](CONFIGURE.md) to configure your firmware before build.
 
+Changelog
+===
+With each version **X-SCARA** gets improved, check the [changelog](CHANGELOG.md). 
+
 Gcodes
 ===
 Use [this page](GCODES.md) to understand **X-SCARA** specific commands.
