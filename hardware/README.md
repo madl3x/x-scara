@@ -15,4 +15,4 @@ Bill of materials is available per set. Each set will publish the list of parts 
 
 Changelog
 ===
-See the full changelog [here](frame/README.md).
+See the full changelog [here](CHANGELOG.md).
