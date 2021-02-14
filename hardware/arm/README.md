@@ -68,7 +68,7 @@ Printed parts
 | **E3D MOUNT**                |       |                                                                     |
 | Arm_EMount_Base_ABL          <td> 1<td rowspan=3> ![arm](images/parts/Arm_EMount.png)                      |
 | Arm_EMount_Base_Left         | 1     |                                                                     |
-| Arm_EMount_Fan               | 1     |                                                                     |
+| Arm_EMount_Base_Right        | 1     |                                                                     |
 
 
 Assembly
@@ -258,9 +258,7 @@ Step 4 - Assemble the extruder mount
 ---
 ![elbow hub](images/assembly/ExtruderMount.png)
 
-It can be assembled separately. Get your *E3D* hotend and plece it between the two **Arm_EMount_Base** parts. Connect the parts together by mounting the **Arm_EMount_Fan** part. Screw directly in plastic, no metal nuts are required.
-
-Mount the hotend fan using four **M3x15** screws. 
+It can be assembled separately. Get your *E3D* hotend and plece it between the two **Arm_EMount_Base** parts. Connect the parts together by mounting the **Arm_EMount_Base_ABL** part. Screw directly in plastic, no metal nuts are required.
 
 Step 5 - Install the extruder mount
 ---
