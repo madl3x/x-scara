@@ -28,3 +28,7 @@ Revision 2
 - Corrected the width of M3 nut holes to be same for all parts, arm and frame (some parts had larger holes for fitting M3 nuts)
 - Renamed `Frame_Plate_Side_RodClamp_Left` to `Frame_Plate_Side_Left`
 - Renamed `Frame_Plate_Side_RodClamp_Right` to `Frame_Plate_Side_Right`
+
+Revision 3
+===
+- Added endstop part for holding 5x5 magnets

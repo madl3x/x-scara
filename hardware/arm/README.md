@@ -34,6 +34,10 @@ Screws and nuts
 Motors
 * 2 x NEMA 17 motor 
 
+Endstops
+* 2 x Neodium 5x5 mm cylindrical magnets (for endstops)
+* 2 x Hall-effect endstops
+
 CAD
 ===
 For a complete preview of the the assemblies, visit these links:
@@ -69,7 +73,8 @@ Printed parts
 | Arm_EMount_Base_ABL          <td> 1<td rowspan=3> ![arm](images/parts/Arm_EMount.png)                      |
 | Arm_EMount_Base_Left         | 1     |                                                                     |
 | Arm_EMount_Base_Right        | 1     |                                                                     |
-
+| **ENDSTOPS**                 |       |                                                                     |
+| Arm_Endstop                  | 2     | ![endstop](images/parts/Arm_Endstop.png)                            |
 
 Assembly
 ===
@@ -82,6 +87,7 @@ The arm assembly can be split into five separate stages:
 3. Elbow and extruder mount assembly
 4. Connecting shoulder and base
 5. Connecting the arm to X-SCARA frame 
+6. Mount the endstops
 
 These parts will then connect together and form the entire arm. The arm can later on be coupled to the X-SCARA frame.
 You can fully assemble the arm and test it, separately from the frame.
@@ -279,7 +285,7 @@ Tighten the four screws on the back of the **Arm_Shoulder_Connector** as indicat
 Stage 5 - Atach the entire arm to the frame
 ===
 
-![base connect](images/assembly/Final.png)
+![final](images/assembly/Final.png)
 
 * Remove all rods and the the lead screw from your frame. Place the frame on the back side for ease of manoeuvre.
 * Install the side 8mm rods partially and insert the rods through the arm assembly. 
@@ -295,6 +301,14 @@ If you are using two Z-nuts make sure the arm can climb and descend easily.
 Adjust the screws on one of the Z-nuts to make sure it does not add too much tension on the lead screw.
 
 * Connect the lead screw to the Z motor with the coupling shaft
+
+Stage 6 - Mount the endstops
+===
+![endstops](images/assembly/Endstops.png)
+
+X-SCARA uses magnetic endstops for homing. The endstops are mounted on the shoulder and elbow axis directly and they are secured using an **M3** screw.
+
+For more details check the firmware calibration guide.
 
 Done
 ===
