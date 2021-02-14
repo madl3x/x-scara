@@ -1,4 +1,5 @@
-Work in progress
+Test-part
 ===
+Get it from [here](test-part/README.md).
 
-This folder will be updated with accessories and mounts designed for X-SCARA frame or arm.
+Designed to test your 3D printer profile, to make sure the X-SCARA parts you are printing fit well with the metal hardware.

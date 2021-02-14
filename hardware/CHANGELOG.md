@@ -32,3 +32,7 @@ Revision 2
 Revision 3
 ===
 - Added endstop part for holding 5x5 magnets
+
+Revision 4
+===
+- Added accessory test part [here](accessories/test-part/README.md)
