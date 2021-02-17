@@ -8,12 +8,13 @@ Hardware
 ===
 
     Updates: 
-    - X-SCARA hardware is now at revision 4!
+    - X-SCARA hardware is now at revision 5!
     - Added test-part accessory to calibrate your printer before you start printing X-SCARA
+    - Added heated bed support directly connected to the X-SCARA frame
 
 The hardware section will contain everything you need to build **X-SCARA**, from the *B.O.M.* to STL files and detailed assembly instructions. 
 
-Check the [hardware section here](hardware/README.md) and if you want to check for updates or new accessories take a look at the [changelog](hardware/CHANGELOG.md).
+Check the [hardware section here](hardware/README.md) and if you want to check for updates and/or new accessories take a look at the [changelog](hardware/CHANGELOG.md).
 
 Firmware
 ===

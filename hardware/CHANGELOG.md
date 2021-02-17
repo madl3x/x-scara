@@ -36,3 +36,7 @@ Revision 3
 Revision 4
 ===
 - Added accessory test part [here](accessories/test-part/README.md)
+
+Revision 5
+===
+- Added accessory for mounting a mini heated bed [here](accessories/fixed-bed-mount/README.md)
