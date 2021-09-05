@@ -2,9 +2,9 @@
 
 Objective
 ===
-**X-SCARA** is a project that intends to bring the SCARA mechanical model to the world of open-source 3D printing machines, with the same functionality and ease of use as the other popular mechanical models (e.g.: Cartesian, CoreXY, Delta, etc.).
+**X-SCARA** is a project that intends to bring the SCARA mechanical model to the world of open-source 3D printing machines, with the same functionality and ease of use as the other popular mechanical models (e.g.: Cartesian, CoreXY, Delta).
 
-    Building, configuring and calibrating the X-SCARA machine must be painless, even for the unexperienced.
+    Building, configuring and calibrating the X-SCARA machine must be painless.
     That is our goal!
 
 Hardware
