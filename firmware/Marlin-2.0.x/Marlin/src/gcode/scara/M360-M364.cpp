@@ -56,44 +56,20 @@ FORCE_INLINE static bool _check_if_running() {
  * 
  *            1 - angular (just for testing and calibration) 
  *                X and Y are shoulder and elbow angles respectively)
+ * 
+ *            2 - probe (for G29) 
+ *                X and Y point to probe's center (not nozzle)
  */
 void GcodeSuite::M360() {
-  
-  uint8_t coordinates_mode = x_scara_coordinates_mode;
   
   // get mode from arguments
   if (parser.seenval('M')) {
     if (_check_if_running()) return;
-
-    coordinates_mode = parser.value_byte();
-    if (coordinates_mode >= X_SCARA_COORDINATES_MODE_END) {
-      SERIAL_ECHOLNPGM("Invalid mode");
-      return;
-    }
+    x_scara_change_coordinates_mode(parser.value_byte());
   }
 
-  // mode is changed
-  if (coordinates_mode != x_scara_coordinates_mode) {
-
-    // position from steppers
-    ab_pos_t cur_pos = {
-      planner.get_axis_position_degrees(A_AXIS),
-      planner.get_axis_position_degrees(B_AXIS)
-    };
-
-    // change coordinates mode
-    x_scara_coordinates_mode = coordinates_mode;
-
-    // update transformed position
-    forward_kinematics_SCARA(cur_pos.a, cur_pos.b);
-    current_position.set(cartes.x, cartes.y);
-
-    // sync and report
-    sync_plan_position();
-    report_current_position();
-  }
-
-  SERIAL_ECHOLNPAIR("Mode:", coordinates_mode);
+  SERIAL_ECHOLNPAIR("Mode: ", x_scara_coordinates_mode, 
+    " (",x_scara_coordinates_mode_str[x_scara_coordinates_mode], ")");
 }
 
 /*
@@ -190,8 +166,29 @@ void GcodeSuite::M362() {
 /**
  * M363: X-SCARA - reserved for future use
  */
-void GcodeSuite::M363() {
+#include "../../module/endstops.h"
 
+void GcodeSuite::M363() {
+  
+  bool home_x = parser.seen("X");
+  bool home_y = parser.seen("Y");
+  if (!home_x && !home_y) return;
+
+  int old_mode = x_scara_coordinates_mode;
+  x_scara_change_coordinates_mode(X_SCARA_COORDINATES_LOCK_XY);
+  
+  endstops.enable();
+
+  if (home_x) {
+    homeaxis(X_AXIS);
+  }
+
+  if (home_y) {
+    homeaxis(Y_AXIS);
+  }
+
+  x_scara_change_coordinates_mode(old_mode);
+  endstops.not_homing();
 }
 
 /**
@@ -199,7 +196,18 @@ void GcodeSuite::M363() {
  */
 
 void GcodeSuite::M364() {
-  SERIAL_ECHOLNPGM(X_SCARA_VERSION_STR);
+  
+
+  #if ENABLED(X_SCARA_DEBUG)
+    if (parser.seenval('D')) {
+      x_scara_debug = parser.value_bool();
+    }
+    SERIAL_ECHOPGM(X_SCARA_VERSION_STR);
+    SERIAL_ECHOLNPAIR(" (Debug:", x_scara_debug, ")");
+  #else
+    SERIAL_ECHOLNPGM(X_SCARA_VERSION_STR);
+  #endif
+
 }
 
 #endif // X_SCARA

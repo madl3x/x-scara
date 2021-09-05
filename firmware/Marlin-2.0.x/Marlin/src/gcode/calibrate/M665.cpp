@@ -67,16 +67,53 @@
    */
   void GcodeSuite::M665() {
  
-    #if ENABLED(X_SCARA_DEBUG)
-      if (parser.seenval('D')) {
-        x_scara_debug = parser.value_bool();
+    // update delta segments per second
+    if (parser.seenval('D')) delta_segments_per_second = parser.value_float();
+
+    // update delta min segment length
+    if (parser.seenval('M')) delta_min_segment_length  = parser.value_float();
+
+    // update new origin offset
+    if (parser.seen_test('X') || parser.seen_test('Y')) {
+      xy_pos_t new_origin_offset = scara_offset;
+      xy_pos_t diff;
+
+      // read new offset from parser
+      if (parser.seenval('X')) new_origin_offset.x = parser.value_float();
+      if (parser.seenval('Y')) new_origin_offset.y = parser.value_float();
+
+      // update new origin offset
+      if (new_origin_offset != scara_offset) {
+        diff = new_origin_offset - scara_offset;
+        scara_offset = new_origin_offset;
+
+        current_position.x += diff.x;
+        current_position.y += diff.y;
+        sync_plan_position();
       }
-      SERIAL_ECHOPAIR("Debug:", x_scara_debug, " ");
-    #endif
+    }
 
-    if (parser.seenval('S')) delta_segments_per_second = parser.value_float();
+    // update new home offset
+    if (parser.seen_test('S') || parser.seen_test('E')) {
+        xy_pos_t new_home_offset = scara_home_offset;
 
-    SERIAL_ECHOLNPAIR("Seg/Sec:", delta_segments_per_second);
+      // read new offset from parser
+      if (parser.seenval('S')) new_home_offset.x = parser.value_float();
+      if (parser.seenval('E')) new_home_offset.y = parser.value_float();
+
+      // update new home offset
+      scara_home_offset = new_home_offset;
+    }
+
+    SERIAL_ECHOLNPAIR_P(
+            PSTR("  M665 D"), delta_segments_per_second
+          , PSTR(" M"), delta_min_segment_length
+          , PSTR(" S"), LINEAR_UNIT(scara_home_offset.a)
+          , PSTR(" E"), LINEAR_UNIT(scara_home_offset.b)
+          , PSTR(" X"), LINEAR_UNIT(scara_offset.x)
+          , PSTR(" Y"), LINEAR_UNIT(scara_offset.y)
+        );
+
   }
 
   #else // X_SCARA

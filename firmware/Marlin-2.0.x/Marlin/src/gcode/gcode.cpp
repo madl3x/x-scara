@@ -53,6 +53,10 @@ GcodeSuite gcode;
   #include "../feature/cancel_object.h"
 #endif
 
+#if ENABLED(X_SCARA)
+  #include "../module/scara.h"
+#endif//X_SCARA
+
 #include "../MarlinCore.h" // for idle()
 
 millis_t GcodeSuite::previous_move_ms;
@@ -277,15 +281,35 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 27: G27(); break;                                    // G27: Nozzle Park
       #endif
 
-      case 28: G28(); break;                                      // G28: Home one or more axes
+      case 28:                                                    // G28: Home one or more axes
+        #if ENABLED(X_SCARA)
+          x_scara_run_gcode(GcodeSuite::G28);
+        #else// X_SCARA
+          G28(); 
+        #endif
+
+      break;
 
       #if HAS_LEVELING
         case 29:                                                  // G29: Bed leveling calibration
+
+          #if ENABLED(X_SCARA)
+            x_scara_run_gcode( 
+              #if ENABLED(G29_RETRY_AND_RECOVER)
+                GcodeSuite::G29_with_retry
+              #else
+                GcodeSuite::G29
+              #endif
+            ); 
+          #else
+
           #if ENABLED(G29_RETRY_AND_RECOVER)
             G29_with_retry();
           #else
             G29();
           #endif
+          
+         #endif// X_SCARA
           break;
       #endif // HAS_LEVELING
 

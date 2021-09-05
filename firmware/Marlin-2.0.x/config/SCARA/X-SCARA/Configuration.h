@@ -64,32 +64,94 @@
  * calibration process and to improve overall mechanical performance and 
  * robustness for a serial SCARA machine.
  * 
- * The X-SCARA machine can work with NO endstops on X/Y axis (or shoulder/elbow
- * joints) and once it's built and configured, can start printing right from 
- * the start. 
- * 
  * For more information:
  *    Thingiverse: https://www.thingiverse.com/thing:4500425
  *    Github: https://github.com/madl3x/x-scara
- * 
  */
 
 #define SCARA
 #define X_SCARA
-#define X_SCARA_DEBUG // activates debug features
+#define X_SCARA_DEBUG       // activates debug printing (turn on by M364 D1)
+#define X_SCARA_DEBUG_START_VERBOSE false
+
+#define DEBUG_LEVELING_FEATURE
 
 #if ENABLED(X_SCARA)
   // If movement is choppy try lowering this value
-  #define SCARA_SEGMENTS_PER_SECOND 100
+  #define SCARA_SEGMENTS_PER_SECOND 30
+
+  /**
+   * Before raising this value, use M665 S[seg_per_sec] to decrease
+   * the number of segments-per-second. Default is 200. Some deltas
+   * do better with 160 or lower. It would be good to know how many
+   * segments-per-second are actually possible for SCARA on AVR.
+   *
+   * Longer segments result in less kinematic overhead
+   * but may produce jagged lines. Try 0.5mm, 1.0mm, and 2.0mm
+   * and compare the difference.
+   */
+  #define SCARA_MIN_SEGMENT_LENGTH  0.5f
   //#define SCARA_FEEDRATE_SCALING
 
-  // Length of inner and outer support arms
+  // Length of inner and outer support arms. Measure arm lengths precisely.
   #define SCARA_LINKAGE_1  98.0    // (mm)
   #define SCARA_LINKAGE_2  98.0    // (mm)
   
   // SCARA tower offset (position of Tower relative to bed zero position)
-  #define SCARA_OFFSET_X     0       // (mm)
-  #define SCARA_OFFSET_Y     -110     // (mm)
+  #define SCARA_OFFSET_X     0      // (mm)
+  #define SCARA_OFFSET_Y    -110    // (mm)
+
+  // Relative probe offset in angles, required for bed leveling (G29)
+  #define SCARA_PROBE_OFFSET_DEGREES 20
+
+  // For X-SCARA these are actually degrees not mmm
+  // It is useful for homing, to know when the movement exceeds
+  // maximum axis length.
+  #define X_MAX_LENGTH 300
+  #define Y_MAX_LENGTH 300
+
+#endif
+
+/**
+ * MORGAN_SCARA was developed by QHARLEY in South Africa in 2012-2013.
+ * Implemented and slightly reworked by JCERNY in June, 2014.
+ */
+//#define MORGAN_SCARA
+/**
+ * Mostly Printed SCARA is an open source design by Tyler Williams. See:
+ *   https://www.thingiverse.com/thing:2487048
+ *   https://www.thingiverse.com/thing:1241491
+ */
+#if EITHER(MORGAN_SCARA, MP_SCARA)
+  // If movement is choppy try lowering this value
+  #define SCARA_SEGMENTS_PER_SECOND 200
+
+  // Length of inner and outer support arms. Measure arm lengths precisely.
+  #define SCARA_LINKAGE_1  98.0    // (mm)
+  #define SCARA_LINKAGE_2  98.0    // (mm)
+
+  // SCARA tower offset (position of Tower relative to bed zero position)
+  // This needs to be reasonably accurate as it defines the printbed position in the SCARA space.
+  #define SCARA_OFFSET_X    0       // (mm)
+  #define SCARA_OFFSET_Y    0       // (mm)
+
+  #if ENABLED(MORGAN_SCARA)
+
+    //#define DEBUG_SCARA_KINEMATICS
+    #define SCARA_FEEDRATE_SCALING  // Convert XY feedrate from mm/s to degrees/s on the fly
+
+    // Radius around the center where the arm cannot reach
+    #define MIDDLE_DEAD_ZONE_R   0  // (mm)
+
+    #define THETA_HOMING_OFFSET  0  // Calculated from Calibration Guide and M360 / M114. See http://reprap.harleystudio.co.za/?page_id=1073
+    #define PSI_HOMING_OFFSET    0  // Calculated from Calibration Guide and M364 / M114. See http://reprap.harleystudio.co.za/?page_id=1073
+
+  #elif ENABLED(MP_SCARA)
+
+    #define SCARA_OFFSET_THETA1  12 // degrees
+    #define SCARA_OFFSET_THETA2 131 // degrees
+
+  #endif
 
 #endif
 
@@ -102,7 +164,7 @@
 // Author info of this build printed to the host during boot and M115
 #define STRING_CONFIG_H_AUTHOR "(Alex Mircescu, Ian-2021)" // Who made the changes.
 
-//#define CUSTOM_VERSION_FILE Version.h // Path from the root directory (no quotes)
+#define CUSTOM_VERSION_FILE Version.h // Path from the root directory (no quotes)
 
 /**
  * *** VENDORS PLEASE READ ***
@@ -444,7 +506,7 @@
 #define TEMP_SENSOR_5 0
 #define TEMP_SENSOR_6 0
 #define TEMP_SENSOR_7 0
-#define TEMP_SENSOR_BED 0
+#define TEMP_SENSOR_BED 1
 #define TEMP_SENSOR_PROBE 0
 #define TEMP_SENSOR_CHAMBER 0
 
@@ -488,7 +550,7 @@
 #define HEATER_5_MAXTEMP 275
 #define HEATER_6_MAXTEMP 275
 #define HEATER_7_MAXTEMP 275
-#define BED_MAXTEMP      150
+#define BED_MAXTEMP      110
 
 //===========================================================================
 //============================= PID Settings ================================
@@ -640,8 +702,8 @@
   //#define ENDSTOPPULLUP_XMAX
   //#define ENDSTOPPULLUP_YMAX
   //#define ENDSTOPPULLUP_ZMAX  // open pin, inverted
-  #define ENDSTOPPULLUP_XMIN  // open pin, inverted
-  #define ENDSTOPPULLUP_YMIN  // open pin, inverted
+  //#define ENDSTOPPULLUP_XMIN  // open pin, inverted
+  //#define ENDSTOPPULLUP_YMIN  // open pin, inverted
   //#define ENDSTOPPULLUP_ZMIN
   //#define ENDSTOPPULLUP_ZMIN_PROBE
 #endif
@@ -684,8 +746,8 @@
  *          TMC5130, TMC5130_STANDALONE, TMC5160, TMC5160_STANDALONE
  * :['A4988', 'A5984', 'DRV8825', 'LV8729', 'L6470', 'L6474', 'POWERSTEP01', 'TB6560', 'TB6600', 'TMC2100', 'TMC2130', 'TMC2130_STANDALONE', 'TMC2160', 'TMC2160_STANDALONE', 'TMC2208', 'TMC2208_STANDALONE', 'TMC2209', 'TMC2209_STANDALONE', 'TMC26X', 'TMC26X_STANDALONE', 'TMC2660', 'TMC2660_STANDALONE', 'TMC5130', 'TMC5130_STANDALONE', 'TMC5160', 'TMC5160_STANDALONE']
  */
-#define X_DRIVER_TYPE  A4988
-#define Y_DRIVER_TYPE  A4988
+#define X_DRIVER_TYPE  LV8729
+#define Y_DRIVER_TYPE  LV8729
 #define Z_DRIVER_TYPE  A4988
 //#define X2_DRIVER_TYPE A4988
 //#define Y2_DRIVER_TYPE A4988
@@ -752,7 +814,7 @@
  * Z - uses 400 steps/mm for moving Z (with 16 microsteps)
  * E - adjust according to your extruder (93 is for MK8 extruder)
  */
-#define DEFAULT_AXIS_STEPS_PER_UNIT   { 26.6667, 80, 400, 93 }
+#define DEFAULT_AXIS_STEPS_PER_UNIT   { 26.666666666666667, 80, 400, 418.5 }
 
 /**
  * Default Max Feed Rate (mm/s)
@@ -772,7 +834,7 @@
  * Override with M201
  *                                      X, Y, Z, E0 [, E1[, E2...]]
  */
-#define DEFAULT_MAX_ACCELERATION      { 1000, 1000, 10, 20000 }
+#define DEFAULT_MAX_ACCELERATION      { 1000, 1000, 100, 20000 }
 
 //#define LIMITED_MAX_ACCEL_EDITING     // Limit edit via M201 or LCD to DEFAULT_MAX_ACCELERATION * 2
 #if ENABLED(LIMITED_MAX_ACCEL_EDITING)
@@ -889,13 +951,13 @@
  * A Fix-Mounted Probe either doesn't deploy or needs manual deployment.
  *   (e.g., an inductive probe or a nozzle-based probe-switch.)
  */
-#define FIX_MOUNTED_PROBE
+//#define FIX_MOUNTED_PROBE
 
 /**
  * Use the nozzle as the probe, as with a conductive
  * nozzle system or a piezo-electric smart effector.
  */
-//#define NOZZLE_AS_PROBE
+#define NOZZLE_AS_PROBE
 
 /**
  * Z Servo Probe, such as an endstop switch on a rotating arm.
@@ -982,10 +1044,10 @@
 
 // Most probes should stay away from the edges of the bed, but
 // with NOZZLE_AS_PROBE this can be negative for a wider probing area.
-#define MIN_PROBE_EDGE 10
+#define MIN_PROBE_EDGE 15
 
 // X and Y axis travel speed (mm/m) between probes
-#define XY_PROBE_SPEED 8000
+#define XY_PROBE_SPEED HOMING_FEEDRATE_XY
 
 // Feedrate (mm/m) for the first approach when double-probing (MULTIPLE_PROBING == 2)
 #define Z_PROBE_SPEED_FAST HOMING_FEEDRATE_Z
@@ -1100,7 +1162,7 @@
 
 //#define UNKNOWN_Z_NO_RAISE      // Don't raise Z (lower the bed) if Z is "unknown." For beds that fall when Z is powered off.
 
-//#define Z_HOMING_HEIGHT  4      // (mm) Minimal Z height before homing (G28) for Z clearance above the bed, clamps, ...
+#define Z_HOMING_HEIGHT  4      // (mm) Minimal Z height before homing (G28) for Z clearance above the bed, clamps, ...
                                   // Be sure to have this much clearance over your Z_MAX_POS to prevent grinding.
 
 //#define Z_AFTER_HOMING  10      // (mm) Height to move to after homing Z
@@ -1114,12 +1176,12 @@
 // @section machine
 
 // The size of the print bed
-#define X_BED_SIZE 240
-#define Y_BED_SIZE 80
+#define X_BED_SIZE 90
+#define Y_BED_SIZE 90
 
 // Travel limits (mm) after homing, corresponding to endstop positions.
-#define X_MIN_POS -120
-#define Y_MIN_POS -40
+#define X_MIN_POS (0-X_BED_SIZE/2)
+#define Y_MIN_POS (0-Y_BED_SIZE/2)
 #define Z_MIN_POS 0
 #define X_MAX_POS (X_MIN_POS + X_BED_SIZE)
 #define Y_MAX_POS (Y_MIN_POS + Y_BED_SIZE)
@@ -1226,8 +1288,8 @@
  */
 //#define AUTO_BED_LEVELING_3POINT
 //#define AUTO_BED_LEVELING_LINEAR
-#define AUTO_BED_LEVELING_BILINEAR
-//#define AUTO_BED_LEVELING_UBL
+//#define AUTO_BED_LEVELING_BILINEAR
+#define AUTO_BED_LEVELING_UBL
 //#define MESH_BED_LEVELING
 
 /**
@@ -1305,8 +1367,8 @@
 
   //#define MESH_EDIT_GFX_OVERLAY   // Display a graphics overlay while editing the mesh
 
-  #define MESH_INSET 1              // Set Mesh bounds as an inset region of the bed
-  #define GRID_MAX_POINTS_X 10      // Don't use more than 15 points per axis, implementation limited.
+  #define MESH_INSET 20              // Set Mesh bounds as an inset region of the bed
+  #define GRID_MAX_POINTS_X 3      // Don't use more than 15 points per axis, implementation limited.
   #define GRID_MAX_POINTS_Y GRID_MAX_POINTS_X
 
   #define UBL_MESH_EDIT_MOVES_Z     // Sophisticated users prefer no movement of nozzle
@@ -1386,11 +1448,11 @@
 #endif
 
 // Homing speeds (mm/m)
-#define HOMING_FEEDRATE_XY (20*60)
+#define HOMING_FEEDRATE_XY (60*60)
 #define HOMING_FEEDRATE_Z  (4*60)
 
 // Validate that endstops are triggered on homing moves
-//#define VALIDATE_HOMING_ENDSTOPS
+#define VALIDATE_HOMING_ENDSTOPS
 
 // @section calibrate
 

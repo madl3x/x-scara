@@ -628,8 +628,6 @@ class Planner {
     static void buffer_sync_block();
 
   #if IS_KINEMATIC
-    private:
-
       // Allow do_homing_move to access internal functions, such as buffer_segment.
       friend void do_homing_move(const AxisEnum, const float, const feedRate_t);
   #endif

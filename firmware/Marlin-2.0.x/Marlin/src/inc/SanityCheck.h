@@ -561,9 +561,55 @@
 
 /**
  * Validate that the bed size fits
+ * For X-SCARA axis length is in degrees, bed size is in mm
  */
+#ifndef X_SCARA
 static_assert(X_MAX_LENGTH >= X_BED_SIZE, "Movement bounds (X_MIN_POS, X_MAX_POS) are too narrow to contain X_BED_SIZE.");
 static_assert(Y_MAX_LENGTH >= Y_BED_SIZE, "Movement bounds (Y_MIN_POS, Y_MAX_POS) are too narrow to contain Y_BED_SIZE.");
+#endif
+
+/*
+ * X-SCARA sanity checks
+ */
+
+#if ENABLED(X_SCARA)
+  #if ENABLED(QUICK_HOME)
+    #error "X-SCARA is not compatible with QUICK_HOME, use normal homing instead"
+  #elif DISABLED(CODEPENDENT_XY_HOMING)
+    #error "X-SCARA needs CODEPENDENT_XY_HOMING enabled!"
+  #elif ENABLED(HOME_Y_BEFORE_X)
+    #error "X-SCARA needs to home X before Y (shoulder before elbow), disable HOME_Y_BEFORE_X"
+  #elif Z_HOMING_HEIGHT == 0
+    #error "X-SCARA needs Z_HOMING_HEIGHT to have clearance when homing"
+  #elif ENABLED(UNKNOWN_Z_NO_RAISE)
+    #error "X-SCARA needs UNKNOWN_Z_NO_RAISE disabled to have clearance when homing"
+  #elif DISABLED(HAS_SCARA_OFFSET)
+    #error "X-SCARA needs HAS_SCARA_OFFSET activated to store homing offset"
+  #elif DISABLED(NOZZLE_AS_PROBE)
+    #error "X-SCARA requires NOZZLE_AS_PROBE enabled (no XY offset for probe)"
+  #endif
+  #ifndef SCARA_MIN_SEGMENT_LENGTH
+    #error "X-SCARA requires SCARA_MIN_SEGMENT_LENGTH to be defined"
+  #endif
+  #ifndef SCARA_SEGMENTS_PER_SECOND
+    #error "X-SCARA requires SCARA_SEGMENTS_PER_SECOND to be defined"
+  #endif
+  #ifndef SCARA_LINKAGE_1
+    #error "X-SCARA requires SCARA_LINKAGE_1 to be defined"
+  #endif
+  #ifndef SCARA_LINKAGE_2
+    #error "X-SCARA requires SCARA_LINKAGE_2 to be defined"
+  #endif
+  #ifndef SCARA_OFFSET_X
+    #error "X-SCARA requires SCARA_OFFSET_X to be defined (distance to center)"
+  #endif
+  #ifndef SCARA_OFFSET_Y
+    #error "X-SCARA requires SCARA_OFFSET_Y to be defined (distance to center)"
+  #endif
+  #if ENABLED(HAS_BED_PROBE) && !SCARA_PROBE_OFFSET_DEGREES
+    #error "X-SCARA requires SCARA_PROBE_OFFSET_DEGREES to be defined (probe offset in degrees)"
+  #endif
+#endif 
 
 /**
  * Granular software endstops (Marlin >= 1.1.7)
@@ -1311,7 +1357,11 @@ static_assert(Y_MAX_LENGTH >= Y_BED_SIZE, "Movement bounds (Y_MIN_POS, Y_MAX_POS
   #undef PROBE_MANUALLY
 
   #if IS_SCARA
-    #error "AUTO_BED_LEVELING_UBL does not yet support SCARA printers."
+
+    // X-SCARA supports UBL
+    #if DISABLED(X_SCARA)
+      #error "AUTO_BED_LEVELING_UBL does not yet support SCARA printers."
+    #endif
   #elif DISABLED(EEPROM_SETTINGS)
     #error "AUTO_BED_LEVELING_UBL requires EEPROM_SETTINGS. Please update your configuration."
   #elif !WITHIN(GRID_MAX_POINTS_X, 3, 15) || !WITHIN(GRID_MAX_POINTS_Y, 3, 15)
@@ -1392,9 +1442,12 @@ static_assert(Y_MAX_LENGTH >= Y_BED_SIZE, "Movement bounds (Y_MIN_POS, Y_MAX_POS
   #if ENABLED(QUICK_HOME)
     #error "QUICK_HOME is incompatible with CODEPENDENT_XY_HOMING."
   #elif IS_KINEMATIC
-    #error "CODEPENDENT_XY_HOMING requires a Cartesian setup."
+    #if !ENABLED(X_SCARA)
+      #error "CODEPENDENT_XY_HOMING requires a Cartesian setup."
+    #endif
   #endif
 #endif
+
 
 /**
  * Make sure Z_SAFE_HOMING point is reachable

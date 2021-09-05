@@ -28,20 +28,14 @@
 #include "../core/macros.h"
 
 extern float delta_segments_per_second;
-
-float constexpr 
-      L1 = SCARA_LINKAGE_1, 
-      L2 = SCARA_LINKAGE_2;
-      
-void scara_set_axis_is_at_home(const AxisEnum axis);
-void inverse_kinematics(const xyz_pos_t &raw);
-void forward_kinematics_SCARA(const float &a, const float &b);
-void scara_report_positions();
+extern xyz_pos_t scara_home_offset;
 
 /*
- * X_SCARA specifics
+ * X-SCARA compiler directives
  */
-#ifdef X_SCARA 
+#if ENABLED(X_SCARA)
+
+  extern float delta_min_segment_length;
 
   #if ENABLED(X_SCARA_DEBUG)
     extern bool x_scara_debug;
@@ -50,26 +44,68 @@ void scara_report_positions();
     #define X_SCARA_DEBUG_LNPAIR(V...) 
   #endif
 
-  #define X_SCARA_VERSION_STR "0.2 Alpha"
+  #define X_SCARA_VERSION_STR "0.4 Beta"
+#endif//X_SCARA
 
-  extern xy_pos_t scara_offset;
-  
+float constexpr L1 = SCARA_LINKAGE_1, L2 = SCARA_LINKAGE_2;
+      
+void scara_set_axis_is_at_home(const AxisEnum axis);
+void inverse_kinematics(const xyz_pos_t &raw);
+void forward_kinematics_SCARA(const float &a, const float &b);
+void scara_report_positions();
+
+inline bool scara_position_is_reachable(const float &rx, const float &ry, const float inset=0) {
+
+  #if EITHER(MORGAN_SCARA, MP_SCARA)
+      const float R2 = HYPOT2(rx - SCARA_OFFSET_X, ry - SCARA_OFFSET_Y);
+      return (
+        R2 <= sq(L1 + L2) - inset
+        #if MIDDLE_DEAD_ZONE_R > 0
+          && R2 >= sq(float(MIDDLE_DEAD_ZONE_R))
+        #endif
+      );
+  #elif ENABLED(X_SCARA)
+    X_SCARA_DEBUG_LNPAIR("CHCK X:",rx," Y:",ry, " I:", inset);
+    return true; ///TBD: software endstops or this, not clear yet
+  #endif
+}
+
+/*
+ * X_SCARA definitions
+ */
+#ifdef X_SCARA 
+
   enum X_SCARA_COORDINATES_MODE {
-        X_SCARA_COORDINATES_CARTESIAN,
-        X_SCARA_COORDINATES_RELATIVE_ANGLES,
+        X_SCARA_COORDINATES_CARTESIAN         = 0,
+        X_SCARA_COORDINATES_RELATIVE_ANGLES   = 1,
+        X_SCARA_COORDINATES_CARTESIAN_PROBE_AT_CENTER = 2,
+        X_SCARA_COORDINATES_LOCK_XY = 3,
         X_SCARA_COORDINATES_MODE_END
   };
+
+  typedef void (*_gcode_fn_t)();
+
+  /* X-SCARA global variables */
+  extern xy_pos_t scara_offset;
   extern uint8_t x_scara_coordinates_mode;
+  extern const char * x_scara_coordinates_mode_str [];
 
-
+  /* X-SCARA  inline methods */
   FORCE_INLINE void x_scara_relative_to_delta(ab_pos_t & angles) {
     angles.b += angles.a/3;
   }
+
   FORCE_INLINE void x_scara_delta_to_relative(ab_pos_t & angles) {
     angles.b -= angles.a/3;
   }
 
-  void x_scara_move_joints(ab_pos_t & pos);
+  /* X-SCARA functions */
+  void x_scara_begin();
 
+  void x_scara_run_gcode(_gcode_fn_t gcode_fn);
+
+  void x_scara_move_joints(ab_pos_t & pos, const feedRate_t &fr_mm_s=0.0f);
+
+  void x_scara_change_coordinates_mode(uint8_t coordinates_mode);
 
 #endif // X_SCARA

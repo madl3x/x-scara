@@ -315,7 +315,7 @@
 #else // UBL_SEGMENTED
 
   #if IS_SCARA
-    #define DELTA_SEGMENT_MIN_LENGTH 0.25 // SCARA minimum segment size is 0.25mm
+   #define DELTA_SEGMENT_MIN_LENGTH 0.25 // SCARA minimum segment size is 0.25mm
   #elif ENABLED(DELTA)
     #define DELTA_SEGMENT_MIN_LENGTH 0.10 // mm (still subject to DELTA_SEGMENTS_PER_SECOND)
   #else // CARTESIAN

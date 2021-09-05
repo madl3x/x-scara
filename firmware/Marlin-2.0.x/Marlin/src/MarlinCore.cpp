@@ -57,6 +57,10 @@
 #include "gcode/parser.h"
 #include "gcode/queue.h"
 
+#if ENABLED(X_SCARA)
+  #include "module/scara.h"
+#endif 
+
 #if ENABLED(TOUCH_BUTTONS)
   #include "feature/touch/xpt2046.h"
 #endif
@@ -1157,6 +1161,10 @@ void setup() {
 
   #if ENABLED(MAX7219_DEBUG)
     SETUP_RUN(max7219.init());
+  #endif
+
+  #if ENABLED(X_SCARA)
+    x_scara_begin();
   #endif
 
   marlin_state = MF_RUNNING;

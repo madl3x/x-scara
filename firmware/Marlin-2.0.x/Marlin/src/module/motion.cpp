@@ -169,12 +169,13 @@ xyz_pos_t cartes;
 
   abc_pos_t delta;
 
-  #if HAS_SCARA_OFFSET
-    abc_pos_t scara_home_offset;
-  #endif
-
   #if HAS_SOFTWARE_ENDSTOPS
-    float delta_max_radius, delta_max_radius_2;
+
+    /* X-SCARA uses software endstops in cartesian space */
+    #if !ENABLED(X_SCARA)
+      float delta_max_radius, delta_max_radius_2;
+    #endif
+
   #elif IS_SCARA
     constexpr float delta_max_radius = SCARA_PRINTABLE_RADIUS,
                     delta_max_radius_2 = sq(SCARA_PRINTABLE_RADIUS);
@@ -651,7 +652,8 @@ void restore_feedrate_and_scaling() {
 
     if (!soft_endstops_enabled) return;
 
-    #if IS_KINEMATIC
+    /* X-SCARA uses software endstops in cartesian space */
+    #if IS_KINEMATIC && !ENABLED(X_SCARA)
 
       #if ENABLED(DELTA)
         if (!all_axes_homed()) return;
@@ -721,21 +723,6 @@ FORCE_INLINE void segment_idle(millis_t &next_idle_ms) {
 }
 
 #if IS_KINEMATIC
-
-  #if IS_SCARA
-    /**
-     * Before raising this value, use M665 S[seg_per_sec] to decrease
-     * the number of segments-per-second. Default is 200. Some deltas
-     * do better with 160 or lower. It would be good to know how many
-     * segments-per-second are actually possible for SCARA on AVR.
-     *
-     * Longer segments result in less kinematic overhead
-     * but may produce jagged lines. Try 0.5mm, 1.0mm, and 2.0mm
-     * and compare the difference.
-     */
-    #define SCARA_MIN_SEGMENT_LENGTH 0.5f
-  #endif
-
   /**
    * Prepare a linear move in a DELTA or SCARA setup.
    *
@@ -785,8 +772,12 @@ FORCE_INLINE void segment_idle(millis_t &next_idle_ms) {
 
     // For SCARA enforce a minimum segment size
     #if IS_SCARA
-      NOMORE(segments, cartesian_mm * RECIPROCAL(SCARA_MIN_SEGMENT_LENGTH));
-    #endif
+      #if ENABLED(X_SCARA)
+        NOMORE(segments, cartesian_mm * RECIPROCAL(delta_min_segment_length));
+      #else//X_SCARA
+        NOMORE(segments, cartesian_mm * RECIPROCAL(SCARA_MIN_SEGMENT_LENGTH));
+      #endif//X_SCARA
+    #endif//IS_SCARA
 
     // At least one segment is required
     NOLESS(segments, 1U);
@@ -808,14 +799,38 @@ FORCE_INLINE void segment_idle(millis_t &next_idle_ms) {
     SERIAL_EOL();
     //*/
 
+    #if ENABLED(X_SCARA)
+      X_SCARA_DEBUG_LNPAIR(
+        "DST  X:", destination.x
+        , " Y:", destination.y
+        , " mm:", cartesian_mm
+        , " sec:", seconds
+        , " seg:", segments
+        , " seg_mm:", cartesian_segment_mm );
+    #endif//X_SCARA
+
     // Get the current position as starting point
     xyze_pos_t raw = current_position;
 
+    #if HAS_LEVELING
+    float unleveled_z = raw.z;
+    #endif
+
     // Calculate and execute the segments
-    millis_t next_idle_ms = millis() + 200UL;
+    // TODO: is segment_idle() necessary?!
+    //millis_t next_idle_ms = millis() + 200UL;
+
     while (--segments) {
-      segment_idle(next_idle_ms);
-      raw += segment_distance;
+
+      //segment_idle(next_idle_ms);
+      #if HAS_LEVELING
+        raw.z = unleveled_z;
+        raw += segment_distance;
+        if (planner.leveling_active) planner.apply_leveling(raw);
+      #else
+        raw += segment_distance;
+      #endif//HAS_LEVELING
+
       if (!planner.buffer_line(raw, scaled_fr_mm_s, active_extruder, cartesian_segment_mm
         #if ENABLED(SCARA_FEEDRATE_SCALING)
           , inv_duration
@@ -824,8 +839,15 @@ FORCE_INLINE void segment_idle(millis_t &next_idle_ms) {
         break;
     }
 
-    // Ensure last segment arrives at target location.
-    planner.buffer_line(destination, scaled_fr_mm_s, active_extruder, cartesian_segment_mm
+    // Ensure last segment arrives at target location
+    raw = destination;
+
+    #if HAS_LEVELING
+      if (planner.leveling_active) planner.apply_leveling(raw);
+    #endif
+
+    // Move to destination
+    planner.buffer_line(raw, scaled_fr_mm_s, active_extruder, cartesian_segment_mm
       #if ENABLED(SCARA_FEEDRATE_SCALING)
         , inv_duration
       #endif
@@ -1348,7 +1370,7 @@ void do_homing_move(const AxisEnum axis, const float distance, const feedRate_t 
     #endif
   }
 
-  #if IS_SCARA
+  #if EITHER(MORGAN_SCARA,MP_SCARA)
     // Tell the planner the axis is at 0
     current_position[axis] = 0;
     sync_plan_position();
@@ -1505,7 +1527,7 @@ void set_axis_not_trusted(const AxisEnum axis) {
 
 void homeaxis(const AxisEnum axis) {
 
-  #if IS_SCARA
+  #if EITHER(MORGAN_SCARA, MP_SCARA)
     // Only Z homing (with probe) is permitted
     if (axis != Z_AXIS) { BUZZ(100, 880); return; }
   #else

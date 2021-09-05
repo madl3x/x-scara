@@ -66,9 +66,16 @@
 /**
  * Axis lengths and center
  */
-#define X_MAX_LENGTH (X_MAX_POS - (X_MIN_POS))
-#define Y_MAX_LENGTH (Y_MAX_POS - (Y_MIN_POS))
-#define Z_MAX_LENGTH (Z_MAX_POS - (Z_MIN_POS))
+  
+#ifndef X_MAX_LENGTH
+  #define X_MAX_LENGTH (X_MAX_POS - (X_MIN_POS))
+#endif
+#ifndef Y_MAX_LENGTH
+  #define Y_MAX_LENGTH (Y_MAX_POS - (Y_MIN_POS))
+#endif
+#ifndef Z_MAX_LENGTH
+  #define Z_MAX_LENGTH (Z_MAX_POS - (Z_MIN_POS))
+#endif
 
 // Defined only if the sanity-check is bypassed
 #ifndef X_BED_SIZE
@@ -163,12 +170,54 @@
  * SCARA cannot use SLOWDOWN and requires QUICKHOME
  * Printable radius assumes joints can fully extend
  */
-#if IS_SCARA
+#if IS_SCARA && !ENABLED(X_SCARA)
   #undef SLOWDOWN
   #define QUICK_HOME
   #define SCARA_PRINTABLE_RADIUS (SCARA_LINKAGE_1 + SCARA_LINKAGE_2)
-#endif
 
+  /**
+   * Before raising this value, use M665 S[seg_per_sec] to decrease
+   * the number of segments-per-second. Default is 200. Some deltas
+   * do better with 160 or lower. It would be good to know how many
+   * segments-per-second are actually possible for SCARA on AVR.
+   *
+   * Longer segments result in less kinematic overhead
+   * but may produce jagged lines. Try 0.5mm, 1.0mm, and 2.0mm
+   * and compare the difference.
+   */
+  #ifndef SCARA_MIN_SEGMENT_LENGTH
+    #define SCARA_MIN_SEGMENT_LENGTH 0.5f
+  #endif//SCARA_MIN_SEGMENT_LENGTH
+#endif
+/**
+ * X-SCARA specifics
+ * - doesn't use quick home (like IS_SCARA needs)
+ * - enables codependent XY homing
+ * - always homes Y before X (shoulder before elbow) 
+ * - always enables HAS_SCARA_OFFSET
+ */
+#if ENABLED(X_SCARA)
+  #define SCARA_PRINTABLE_RADIUS (SCARA_LINKAGE_1 + SCARA_LINKAGE_2)
+  #define CODEPENDENT_XY_HOMING
+  
+  // Default Seg/sec (adjustable via M665 D)
+  #ifndef SCARA_SEGMENTS_PER_SECOND
+    #define SCARA_SEGMENTS_PER_SECOND 100
+  #endif//SCARA_SEGMENTS_PER_SECOND
+
+  // X-SCARA uses adjustable segment length (via M665 M)
+  #ifndef SCARA_MIN_SEGMENT_LENGTH
+    #define SCARA_MIN_SEGMENT_LENGTH 0.5f
+  #endif//SCARA_MIN_SEGMENT_LENGTH
+
+  #if DISABLED(HAS_SCARA_OFFSET)
+    #define HAS_SCARA_OFFSET 1
+  #endif//HAS_SCARA_OFFSET
+
+  #if HOME_Y_BEFORE_X
+    #undef HOME_Y_BEFORE_X
+  #endif//HOME_Y_BEFORE_X
+#endif
 /**
  * Set the home position based on settings or manual overrides
  */
@@ -1906,7 +1955,7 @@
   #define MIN_PROBE_EDGE 0
 #endif
 
-#if IS_KINEMATIC
+#if IS_KINEMATIC && DISABLED(X_SCARA)
   #undef MIN_PROBE_EDGE_LEFT
   #undef MIN_PROBE_EDGE_RIGHT
   #undef MIN_PROBE_EDGE_FRONT

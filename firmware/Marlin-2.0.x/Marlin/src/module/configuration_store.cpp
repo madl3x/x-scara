@@ -62,6 +62,9 @@
 
 #include "probe.h"
 
+#if IS_SCARA
+  #include "../module/scara.h"
+#endif
 #if HAS_LEVELING
   #include "../feature/bedlevel/bedlevel.h"
 #endif
@@ -169,7 +172,18 @@ typedef struct SettingsDataStruct {
   xyze_float_t planner_max_jerk;                        // M205 XYZE  planner.max_jerk
   float planner_junction_deviation_mm;                  // M205 J     planner.junction_deviation_mm
 
+  #if IS_SCARA
+    #if HAS_SCARA_OFFSET
+    xyz_pos_t scara_home_offset;                        // M665 PT (SCARA)/ES (X-SCARA)
+    xy_pos_t  scara_offset;                             // M665 XY
+    #endif
+    float delta_segments_per_second;                    // M665 S (SCARA)/ D (X-SCARA)
+    #if ENABLED(X_SCARA)
+      float delta_min_segment_length;                     // M665 M (X-SCARA)
+    #endif//X_SCARA
+  #else 
   xyz_pos_t home_offset;                                // M206 XYZ / M665 TPZ
+  #endif
 
   #if HAS_HOTEND_OFFSET
     xyz_pos_t hotend_offset[HOTENDS - 1];               // M218 XYZ
@@ -596,11 +610,26 @@ void MarlinSettings::postprocess() {
     // Home Offset
     //
     {
+      #if IS_SCARA
+        #if HAS_SCARA_OFFSET
+          _FIELD_TEST(scara_home_offset);
+          _FIELD_TEST(scara_offset);
+
+          EEPROM_WRITE(scara_home_offset);
+          EEPROM_WRITE(scara_offset);
+        #endif// HAS_SCARA_OFFSET
+
+        _FIELD_TEST(delta_segments_per_second);
+        EEPROM_WRITE(delta_segments_per_second);
+
+        #if ENABLED(X_SCARA)
+          _FIELD_TEST(delta_min_segment_length);
+          EEPROM_WRITE(delta_min_segment_length);  
+        #endif//X_SCARA
+
+      #else// IS_SCARA
       _FIELD_TEST(home_offset);
 
-      #if HAS_SCARA_OFFSET
-        EEPROM_WRITE(scara_home_offset);
-      #else
         #if !HAS_HOME_OFFSET
           const xyz_pos_t home_offset{0};
         #endif
@@ -1448,11 +1477,25 @@ void MarlinSettings::postprocess() {
       // Home Offset (M206 / M665)
       //
       {
-        _FIELD_TEST(home_offset);
+        #if IS_SCARA
+          #if HAS_SCARA_OFFSET
+            _FIELD_TEST(scara_home_offset);
+            _FIELD_TEST(scara_offset);
 
-        #if HAS_SCARA_OFFSET
-          EEPROM_READ(scara_home_offset);
-        #else
+            EEPROM_READ(scara_home_offset);
+            EEPROM_READ(scara_offset);
+          #endif// HAS_SCARA_OFFSET
+
+          _FIELD_TEST(delta_segments_per_second);
+          EEPROM_READ(delta_segments_per_second);
+
+          #if ENABLED(X_SCARA)
+            _FIELD_TEST(delta_min_segment_length);
+            EEPROM_READ(delta_min_segment_length);  
+          #endif//X_SCARA
+
+        #else// IS_SCARA
+          _FIELD_TEST(home_offset);
           #if !HAS_HOME_OFFSET
             xyz_pos_t home_offset;
           #endif
@@ -2436,9 +2479,20 @@ void MarlinSettings::reset() {
     planner.junction_deviation_mm = float(JUNCTION_DEVIATION_MM);
   #endif
 
-  #if HAS_SCARA_OFFSET
-    scara_home_offset.reset();
-  #elif HAS_HOME_OFFSET
+  #if IS_SCARA
+
+    #if HAS_SCARA_OFFSET
+      scara_home_offset.reset();
+      scara_offset.set(SCARA_OFFSET_X, SCARA_OFFSET_Y);
+    #endif// HAS_HOME_OFFSET
+
+    delta_segments_per_second = SCARA_SEGMENTS_PER_SECOND;
+
+    #if ENABLED(X_SCARA)
+      delta_min_segment_length = SCARA_MIN_SEGMENT_LENGTH;
+    #endif//X_SCARA
+
+  #else// IS_SCARA
     home_offset.reset();
   #endif
 
@@ -3111,14 +3165,27 @@ void MarlinSettings::reset() {
 
     #if HAS_SCARA_OFFSET
 
-      CONFIG_ECHO_HEADING("SCARA settings: S<seg-per-sec> P<theta-psi-offset> T<theta-offset>");
-      CONFIG_ECHO_START();
-      SERIAL_ECHOLNPAIR_P(
-          PSTR("  M665 S"), delta_segments_per_second
-        , SP_P_STR, scara_home_offset.a
-        , SP_T_STR, scara_home_offset.b
-        , SP_Z_STR, LINEAR_UNIT(scara_home_offset.z)
-      );
+      #if ENABLED(X_SCARA)
+        CONFIG_ECHO_HEADING("X-SCARA settings: D<seg-per-sec> M<min-seg-mm> S<shoulder-offset-deg> E<elbow-offset-deg> X<x-origin-mm> Y<y-origin-mm>");
+        CONFIG_ECHO_START();
+        SERIAL_ECHOLNPAIR_P(
+            PSTR("  M665 D"), delta_segments_per_second
+          , PSTR(" M"), delta_min_segment_length
+          , PSTR(" S"), LINEAR_UNIT(scara_home_offset.a)
+          , PSTR(" E"), LINEAR_UNIT(scara_home_offset.b)
+          , PSTR(" X"), LINEAR_UNIT(scara_offset.x)
+          , PSTR(" Y"), LINEAR_UNIT(scara_offset.y)
+        );
+      #else
+        CONFIG_ECHO_HEADING("SCARA settings: S<seg-per-sec> P<theta-psi-offset> T<theta-offset>");
+        CONFIG_ECHO_START();
+        SERIAL_ECHOLNPAIR_P(
+            PSTR("  M665 S"), delta_segments_per_second
+          , SP_P_STR, scara_home_offset.a
+          , SP_T_STR, scara_home_offset.b
+          , SP_Z_STR, LINEAR_UNIT(scara_home_offset.z)
+        );
+      #endif
 
     #elif ENABLED(DELTA)
 

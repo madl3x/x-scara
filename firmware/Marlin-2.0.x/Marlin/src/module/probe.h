@@ -122,7 +122,7 @@ public:
   static inline bool stow() { return set_deployed(false); }
 
   #if HAS_BED_PROBE || HAS_LEVELING
-    #if IS_KINEMATIC
+    #if IS_KINEMATIC && DISABLED(X_SCARA)
       static constexpr float printable_radius = (
         #if ENABLED(DELTA)
           DELTA_PRINTABLE_RADIUS
@@ -138,7 +138,7 @@ public:
 
     static inline float min_x() {
       return (
-        #if IS_KINEMATIC
+        #if IS_KINEMATIC && DISABLED(X_SCARA)
           (X_CENTER) - probe_radius()
         #else
           _MAX((X_MIN_BED) + (MIN_PROBE_EDGE_LEFT), (X_MIN_POS) + offset_xy.x)
@@ -147,7 +147,7 @@ public:
     }
     static inline float max_x() {
       return (
-        #if IS_KINEMATIC
+        #if IS_KINEMATIC && DISABLED(X_SCARA)
           (X_CENTER) + probe_radius()
         #else
           _MIN((X_MAX_BED) - (MIN_PROBE_EDGE_RIGHT), (X_MAX_POS) + offset_xy.x)
@@ -156,7 +156,7 @@ public:
     }
     static inline float min_y() {
       return (
-        #if IS_KINEMATIC
+        #if IS_KINEMATIC && DISABLED(X_SCARA)
           (Y_CENTER) - probe_radius()
         #else
           _MAX((Y_MIN_BED) + (MIN_PROBE_EDGE_FRONT), (Y_MIN_POS) + offset_xy.y)
@@ -165,7 +165,7 @@ public:
     }
     static inline float max_y() {
       return (
-        #if IS_KINEMATIC
+        #if IS_KINEMATIC && DISABLED(X_SCARA)
           (Y_CENTER) + probe_radius()
         #else
           _MIN((Y_MAX_BED) - (MIN_PROBE_EDGE_BACK), (Y_MAX_POS) + offset_xy.y)
@@ -182,7 +182,7 @@ public:
           points[1].set(PROBE_PT_2_X, PROBE_PT_2_Y);
           points[2].set(PROBE_PT_3_X, PROBE_PT_3_Y);
         #else
-          #if IS_KINEMATIC
+          #if IS_KINEMATIC && DISABLED(X_SCARA)
             constexpr float SIN0 = 0.0, SIN120 = 0.866025, SIN240 = -0.866025,
                             COS0 = 1.0, COS120 = -0.5    , COS240 = -0.5;
             points[0].set((X_CENTER) + probe_radius() * COS0,   (Y_CENTER) + probe_radius() * SIN0);

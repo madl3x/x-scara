@@ -51,6 +51,10 @@
   #include "../../libs/L64XX/L64XX_Marlin.h"
 #endif
 
+#if ENABLED(X_SCARA)
+  #include "../../module/scara.h"
+#endif
+
 #define DEBUG_OUT ENABLED(DEBUG_LEVELING_FEATURE)
 #include "../../core/debug_out.h"
 
@@ -377,7 +381,7 @@ void GcodeSuite::G28() {
     }
 
     // Home Y (after X)
-    if (DISABLED(HOME_Y_BEFORE_X) && doY)
+    if (DISABLED(HOME_Y_BEFORE_X) && (doY || (ENABLED(CODEPENDENT_XY_HOMING) && doX)))
       homeaxis(Y_AXIS);
 
     #if ENABLED(IMPROVE_HOMING_RELIABILITY)
