@@ -1,61 +1,113 @@
 Marlin configuration
 ===
+> This is the configuration tutorial for the `0.4 - Beta` firmware!
+
 The two template configuration files you can start from are in `Marlin-2.0.x/config` folder: 
 * [Configuration.h](Marlin-2.0.x/config/SCARA/X-SCARA/Configuration.h) 
 * [Configuration_Adv.h](Marlin-2.0.x/config/SCARA/X-SCARA/Configuration_Adv.h)
 
+Coordinate mapping
+===
+To get a glympse of how the cartesian coordinate system is mapped, we have some examples:
+
+* (X0,Y0) - represents the location where the center of the shoulder axis is;
+* (X0,Y186) - the location where the center of the extruder nozzle is, when the arm is perfectly straight (shoulder & elbow angle are 0º);
+* (X98,Y98) - -"- when shoulder angle is 0º and elbow angle is 90º;
+* (x-98,Y98) - -"- when shoudler angle is -90º and elbow angle is 0º;
+
+
 Configuration.h
 ===
-Enable X-SCARA implementation
-***
+
+#### `X_SCARA`
 To enable **X-SCARA** support in **Marlin** you need to define `X-SCARA` and `SCARA` compile time options.
 
 #### `X_SCARA_DEBUG`
-Activate extensive tracing to the serial console for debugging the implemention(not needed in production)
+Activate extensive tracing to the serial console for debugging the implemention(not needed in production).
 
 #### `SCARA_LINKAGE_1`
-Length of shoulder to elbow linkage (for **X_SCARA** this is 98mm)
+Length of shoulder to elbow linkage (for **X_SCARA** this is currently `98` mm).
 
 #### `SCARA_LINKAGE_2`
-Length of elbow to tip linkage (for **X_SCARA** this is 98mm)
+Length of elbow to tip linkage (for **X_SCARA** this is currently `98` mm).
 
 #### `SCARA_OFFSET_X` and `SCARA_OFFSET_Y`
-Bed center offset from the real coordinate mapping (if bed is at center, X will alwayse be 0).
+Bed center offset from the real coordinate mapping (if bed is aligned with machine's center, X will be 0).
 
-To get a glympse of how the cartesian coordinate system is mapped, we have some examples:
+Default value for **98mm** linkage lengths is `X`:`0` mm and `Y`:`-110`mm.
 
-* (X0,Y0) - represents the location where the center of the shoulder axis is
-* (X0,Y186) - represents the location where the center of the extruder nozzle is, when the arm is perfectly straight (shoulder angle is 0º, elbow is 0º)
-* (X98,Y98) - represents the location where the center of the extruder nozzle is, when shoulder angle is 0º and elbow angle is 90º
-* (x-98,Y98) - represents the location where the center of the extruder nozzle is, when shoudler angle is -90º and elbow angle is 0º
-
+> Starting with Firmwre **V0.4** `SCARA_OFFSET_X` and `SCARA_OFFSET_Y` are configurable at run-time using `M665 X Y` G-Code and can be saved/restored to/from EEPROM using `M50x` commands.
 
 #### `SCARA_SEGMENTS_PER_SECOND`
-The number of segments per second that SCARA will use to execute an actual move.
+The default number of segments per second that **X-SCARA** will use to segment a linear move.
 
+Tune this value according to your Mainboard's processor. For an 8-bit AVR this can range from `30` to `200`, for a 32-bit ARM processor this value can go even higher. If the movement is choppy when you run `G1` gcode, set this configuration to a lower value (e.g.: for 30 segments per second `M665 D30`).
 
+The higher this value is, the more precise the movements will be, with the cost of more CPU usage.
+
+> Starting with Firmware **V0.4** you can configure this setting at run-time using `M665 D` G-Code, and save it to EEPROM using `M500`.
+
+#### `SCARA_MIN_SEGMENT_LENGTH`
+The minimum segment width the **X-SCARA** will use for segmented moved. Default is `0.5` mm.
+
+Setting this value higher, will reduce the kinematic overhead and use less CPU for linear movements, but the prints will have more jagged lines. For better precission, reduce this value to the lowest possible and also raise the number of segments using `M665 D` G-Code command.
+
+> Starting with Firmware **V0.4** you can configure this setting at run-time using `M665 M` G-Code, and save it to EEPROM using `M500`.
+
+#### `SCARA_PROBE_OFFSET_DEGREES`
+The angular offset the bed probe is positioned relative to the extruder's nozzle, in degrees. Default is `20` degrees.
+
+**X-SCARA** cant't use the already existing cartesian probe offset configuration in Marlin, because the probe changes orientation when either of the two axis are moving, therefore it also changes the relative position in cartesian space against the extruder's nozzle. This problem only exists in SCARA mechanical models, DELTA, CoreXY and Cartesian printers keep the same X,Y offset of the probe when print head is moving.
+
+To solve this, **X-SCARA** enters in a special `probe` coordinate transformation mode (i.e. `M360 M2`) when required to use the bed probe, applying this offset to the current elbow angle, and instructing the coordinate mapping system to point to the probe, instead of the extruder's nozzle.
+
+Sample configuration that is X-SCARA specific
+===
 ```C
 #define SCARA
 #define X_SCARA
 //#define X_SCARA_DEBUG // activates debug features
 
 #if ENABLED(X_SCARA)
-  #define SCARA_SEGMENTS_PER_SECOND 100
+
+#if ENABLED(X_SCARA)
+  // If movement is choppy try lowering this value
+  #define SCARA_SEGMENTS_PER_SECOND 30
+
+  // Minimum segment length in mm
+  #define SCARA_MIN_SEGMENT_LENGTH  0.5f
+  //#define SCARA_FEEDRATE_SCALING
+
+  // Length of inner and outer support arms. Measure arm lengths precisely.
   #define SCARA_LINKAGE_1  98.0    // (mm)
   #define SCARA_LINKAGE_2  98.0    // (mm)
   
   // SCARA tower offset (position of Tower relative to bed zero position)
-  #define SCARA_OFFSET_X     0       // (mm)
-  #define SCARA_OFFSET_Y     -110     // (mm)
+  #define SCARA_OFFSET_X     0      // (mm)
+  #define SCARA_OFFSET_Y    -110    // (mm)
+
+  // Relative probe offset in angles, required for bed leveling (G29)
+  #define SCARA_PROBE_OFFSET_DEGREES 20
+
+  // For X-SCARA these are actually degrees not mmm
+  // It is useful for homing, to know when the movement exceeds
+  // maximum axis length.
+  #define X_MAX_LENGTH 300
+  #define Y_MAX_LENGTH 300
 
 #endif
+#endif
 ```
+
+Other Marlin configurations
+===
+
 Enable saving configuration to EEPROM 
 ***
 
 I strongly recommend using the EEPROM to save and restore configuration settings.
 
-Currently, X-SCARA doesn't use the EEPROM to save any configuration values, but it will surely do in the future for configuring homing offsets.
+Otherwise, tuning your machine with `M665` will not allow you to store the resulted values persistently.
 
 ```C
 /**
@@ -93,22 +145,12 @@ In regards of bed size, you can use these settings for safe operation.
 
 ```C
 // The size of the print bed
-#define X_BED_SIZE 240
-#define Y_BED_SIZE 80
-```
-
-Homing 
-***
-Current version of **X-SCARA** implementation does not use Endstops on X and Y axis. 
-Disable `VALIDATE_HOMING_ENDSTOPS` so the machine does not panic when `G28` is run.
-
-```C
-// Validate that endstops are triggered on homing moves
-//#define VALIDATE_HOMING_ENDSTOPS
+#define X_BED_SIZE 100
+#define Y_BED_SIZE 100
 ```
 
 Steps per unit
-***
+===
 
 ## X and Y axis
 On the **X-SCARA** machine the *X axis* represents the *shoulder joint*, while the *Y axis* represents the *elbow joint*. Therefore, the number of steps per unit describes the number of steps required to move the joint for an angle of 1 degree (unlike the cartesian printers where the unit is 1mm). Depending on the type motors and microstepping configuration you have, the number of steps per degree may differ. 
