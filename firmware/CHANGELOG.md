@@ -12,6 +12,10 @@
 ===
 - Inverting X axis direction, parts were printed in mirror
 
+0.3 Alpha
+===
+- not published
+
 0.4 Beta
 ===
 - Moved to Beta stage: all basic functionality (homing, bed-leveling, EEPROM configuration) implemented & working

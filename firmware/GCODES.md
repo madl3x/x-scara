@@ -14,76 +14,34 @@ M360 - X-SCARA - Change Coordinates Transformation
  M<int>  - transformation mode (0 or 1)
  
             0 - cartesian (default) 
-                X and Y are cartesian coordinates
+                current X and Y coords. are cartesian coords. pointing to extruder's nozzle
  
-            1 - angular (for testing and calibration) 
-                X and Y are shoulder and elbow angles respectively)
+            1 - angular (used by G28, when homing) 
+                current X and Y coords. are angular coords. of shoulder and elbow position)
+
+            1 - probe (used by G29, when leveling bed) 
+                current X and Y are cartesian cords pointing to probe's center
 ```
 
-This command will instruct the **X-SCARA** machine to switch the entire coordinate mapping system to cartesian or plain angular.
+This command will instruct the **X-SCARA** machine to switch the entire coordinate mapping system to cartesian, angular or probe mode.
 
-In cartesian mode **X-SCARA** will transform the X and Y coordinates to angular positions for the shoulder and elbow joints, using inverse kinematics. To test the machine, it is sometimes useful to bypass that and have direct access to that angular position of each individual joint. 
+> Use this explicitly only for testing and calibration!
 
-This `M360 M1` command allows you to move either the shoulder, or the elbow to an angle you expect and observe the result, usign nothing but standard GCode commands. For example, after invoking `M360 M1` you can move the arm's shoulder to 0º using `G0 X0` or the elbow to 90º using `G0 Y90`.
+#### `Cartesian mode`
 
-It is also useful when using specialized software (like Repetier, Octoprint, Pronterface, etc.) to move the machine's joints to the desired angular position, using their friendly user-interface. 
+In cartesian mode **X-SCARA** will automatically transform the `X` and `Y` coordinates to angular positions for the shoulder and elbow joints, using inverse kinematics. This is the normal mode, using during printing.
 
-After you invoke `M360 M1` the machine will treat each later Gcode command, using X or Y coordinates, as angular positions. It applies to `G0`, `G1`, `G92` and others. It is not intended for regular printing, so after you test the machine, revert the coordinates back with `M360 M0`.
+#### `Angular mode`
 
-Examples:
-```
-# make sure we are in cartesian mode
-> M360 M0
-Mode:0
-ok
+The `M360 M1` command allows you to move either the shoulder, or the elbow to an angle you expect and observe the result, usign standard GCode commands (e.g. `G0`, `G1` or `G92`). For example, after invoking `M360 M1` you can move the arm's shoulder to 0º using `G0 X0` or the elbow to 90º using `G0 Y90`. 
 
-# report current position
-> G92
-X:32.61 Y:11.69 Z:30.00 E:0.00
-Motors A:-933 B:7067 Z:12000
-Joints S:-34.99 E:100.00
+Used internally when homing with `G28`.
 
-ok
+#### `Probe mode`
 
-# change to angular mode (note how joints angle and X,Y are now egual)
-> M360 M1
-X:-34.99 Y:100.00 Z:30.00 E:0.00
-Motors A:-933 B:7067 Z:12000
-Joints S:-34.99 E:100.00
+The `M360 M2` command will switch to a transformation mode, similar to `M360 M0`, but this time pointing to the probe's center, instead of the extruder's nozzle. Used internally by bed-leveling `G29` commands. 
 
-Mode:1
-ok
-
-# G92 will report the same as M360
-> G92
-X:-34.99 Y:100.00 Z:30.00 E:0.00
-Motors A:-933 B:7067 Z:12000
-Joints S:-34.99 E:100.00
-
-ok
-
-# move shoulder to -90 degrees
-> G0 X-90
-ok
-
-# change back to cartesian mode
-> M360 M0
-X:-80.98 Y:-13.49 Z:30.00 E:0.00
-Motors A:-2400 B:5600 Z:12000
-Joints S:-90.00 E:100.00
-
-Mode:0
-ok
-
- # move to 90,0 coordinates
-> G0 X90 Y0
-ok
-# report position
-> G92
-X:90.00 Y:0.00 Z:30.00 E:0.00
-Motors A:-113 B:6850 Z:12000
-Joints S:-4.24 E:87.04
-```
+Used internally when running bed-leveling commands with `G29`.
 
 M361 - X-SCARA - Move joints to angular position
 ----
@@ -93,38 +51,14 @@ M361 - X-SCARA - Move joints to angular position
  
  S<float>  - Move to given shoulder angle (in degrees)
  E<float>  - Move to given elbow angle (in degrees)
- I<booL> - Add the given to the current position instead of setting them
+ I<booL>   - Add the given to the current position instead of setting them
 ```
 
 This command is useful to move the machine's joints to a specific angular position. 
-When invoked, it will report back the angular position of each joint and the coresponding cartesian coordinates. 
-
-Examples:
-```
-# report angular position and cartesian coordinates
-> M361
-S:0.00 E:0.00 X:0.00 Y:86.00
-ok
-
-# move elbow to 90º
-> M361 E90
-S:0.00 E:90.00 X:98.00 Y:-12.00
-ok
-
-# move shoulder to -45º
-> M361 S-45
-S:-45.00 E:90.00 X:-0.00 Y:28.59
-ok
-
-# incrementally move shoulder and elbow 10º more
-> M361 S10 E10 I1
-S:-35.00 E:100.00 X:32.61 Y:11.69
-ok
-```
+When invoked, it will report back the angular position of each joint and the coresponding cartesian coordinates, even if run without arguments.
 
 M362 - X-SCARA - Set current joints position
 ----
-
 ```
  Parameters:
  
@@ -141,44 +75,21 @@ M362 E0 S0
 ```
 This command tells the machine the current position is 0º angle for both shoulder and elbow joints. After that, you can move the machine safely in cartesian space.
 
-Please note that the same effect can be obtained using `G92`, after changing the coordinate system to angular positioning. In contrast with using just `M362` this implies combining more commands, as follows:
+Please note that the same effect can be obtained using `G92`, after changing the coordinate system to angular positioning using `M360 M1`. 
 
-```
-# X,Y are now angular positions 
-> M360 M1
-X:-55.87 Y:111.72 Z:0.00 E:0.00
-Motors A:-1490 B:7448 Z:0
-Joints S:-55.87 E:111.72
-
-Mode:1
-ok
-
-# Reset arm position to 0º
-> G92 X0 Y0
-X:0.00 Y:0.00 Z:0.00 E:0.00
-Motors A:0 B:0 Z:0
-Joints S:0.00 E:0.00
-
-# Move back to cartesian space
-> M360 M0
-X:0.00 Y:86.00 Z:0.00 E:0.00
-Motors A:0 B:0 Z:0
-Joints S:0.00 E:0.00
-
-Mode:0
-ok
-```
+> Soon to become deprecated! Same as `G92` when using `M360 M1`.
 
 M364 - X-SCARA - Get X-SCARA version
 ----
+```
+ Parameters:
+ 
+ D<bool>  - if `X_SCARA_DEBUG` is configured, enable or disabled verbosity
+```
 
 Prints the current version of **X-SCARA** implementation.
 
-```
-> M364
-0.1 Alpha
-ok
-```
+If `X_SCARA_DEBUG` is enabled in `Configuration.h` enables detailed log tracing using `M364 D1`.
 
 Modified Marlin GCodes
 ===
@@ -186,35 +97,83 @@ Modified Marlin GCodes
 G0/G1 - Move to destination
 ---
 
-**X-SCARA** uses the `G0` command to move directly to destination (without intermittent moves) and `G1` command to move to destination using multiple segmented moves.
+**X-SCARA** uses the `G0` command to move directly to destination (without segmented moves) and `G1` command to move to destination using multiple segmented moves.
 
-To configure the number of segments for each move, use `M665` command to set the number of segments per second and the `SCARA_SEGMENTS_PER_SECOND` configuration option to set the default value. 
+To configure the number of segments for each move, use `M665 D` command to set the number of segments per second and `M665 M` command to set the minimum segment length. 
+
+> If the `G1` response is choppy and the linear movement is not fluent, lower the number of segments and/or increase the minimum segment length (e.g. `M665 D30 M0.5`).
 
 Check [Marlin documentation](https://marlinfw.org/docs/gcode/G000-G001.html) for more details. 
 
 G28 - Home axis
 ---
 
-**X-SCARA** will home the *Z axis* just like any other printer. 
+**X-SCARA** will home the `Z` axis using bed-probe and the `X` and `Y` using magnetic endstops. 
 
-For the X and Y axis (currently) the firmware will set the home location in place, to the current machine position, without moving or checking endstops. Make sure the machine si set to (0,0) before calling `G28` or `G28 XY`.
+The endstops for `X` (shoulder) and `Y` (elbow) axis must be positioned at `-90` degrees.
+
+> When the axis is at `-90` degrees, it point towards machine's `right`. </br>
+> When the axis is at `90` degrees, it point  towards machine's  `left`. </br>
+> When the axis is at `0` degrees, it point  towards `forward`.
+
+#### XY Homing sequence
+
+The XY homing sequence is designed to avoid crashing the machine as much as possible.
+
+The two axis are marked as `codependent` and can't be homed independently. Running `G28 X` or `G28 Y` or `G28 XY` will have the same effect.
+
+The homing sequence is more elaborate for **X-SCARA** machine, and it happens as follows:
+
+* (1) - Coordinate transformation is set to `angular` (`M360 M1`)
+* (2) - X axis (shoulder) moves clockwise until it hits the endstop positioned at `-90º`
+* (3) - X axis applies configured home offset (via `M665 X`)
+* (4) - X axis moves back to 0º position
+* (5) - Y axis (elbow) moves clockwise until it hits the endstop position at `-90º`
+* (6) - Y axis applies hconfigured home offset ( via `M665 Y`)
+* (7) - Y axis moves back to 0º position
+* (8) - Coordinate transformation is set back to `cartesian` (`M360 M0`)
+* (9) - Axis are marked as homed
+* (8) - Moving to bed center (`X`0 and `Y`0 in cartesian space)
+
 
 M665 - Set X-SCARA settings
 ----
 ```
  Parameters:
  
- D<bool>  - debug on or off (requires X_SCARA_DEBUG configuration option)
- S<int>   - number of segments per second
+ D<seg-secs>  - sets the number of segments per seconds for linear moves (default is SCARA_SEGMENTS_PER_SECOND)
+ M<seg-min>   - sets the minimum segment length in mm for linear moves (default is SCARA_MIN_SEGMENT_LENGTH)
+ S<offset>    - sets the shoulder home offset in degrees (to calibrate homing)
+ E<offset>    - sets the elbow home offset in degrees (to calibrate homing)
+ X<origin>    - sets the offset on the X axis for bed center position (usually 0, default SCARA_OFFSET_X)
+ Y<origin>    - sets the offset on the Y axis for bed center position (default SCARA_OFFSET_Y)
 ```
 
-This command is used to configure *Delta* printers and also *Scara* machine in *Marlin* Firmware. For **X-SCARA** it is currently use to active debug tracing (when `X_SCARA_DEBUG` is enabled in `Configuration.h`) and set the number of segments per second.
+This command is used to configure *Delta* printers and also *Scara* machine in *Marlin* Firmware. 
+Any of these values can be saved and restored to/from EEPROM using `M50x` G-Code commands.
 
-Default value for segments per second is 100, but if the movement is too choppy, you can lower the value. After you set it to the correct value, use `M500` to save the configuration.
+#### `Tuning segmented moves`
+Tune linear movements using `M665 D` and `M665 M` options. If the movement is choppy, lower the number of segments to a more reasonable value (e.g.: `30`) and/or increase the minimum segment (e.g.: to `0.5`).
 
-Examples:
-```
-> M665 D1 S100
-Debug:1 Seg/Sec:100.00
-ok
-```
+#### `Aligning bed's center`
+
+If the machine doesn't point at the bed's center correctly, use `M665 X Y` to setup the offset the current known center and save the value in EEPROM using `M500`. For example, running `M665 X-5` will move the bed's center to the right by `5` mm.
+
+#### `Calibrating home position`
+
+This is the one of the most important configurations for **X-SCARA**: **calibrating the home position**.
+
+When setting the endstops for the `X` (shoulder) and `Y` (elbow) axis, most likely you will not be able to mechanically position those at perfectly `-90º` angles. The `M665 X Y` command will allow you to do fine adjustements and save those to EEPROM.
+
+Follow this steps to calibrate the home position:
+* (1) - position the `X` and `Y` endstops (the best you can) at `-90º` position
+* (2) - home the machine using `G28 XY`
+* (3) - move the arm to point forward by running  `M361 S0 E0` (i.e.: set elbow and shoulder angular position to 0º)
+* (4) - use the same `M361` command to adjust the angular position for both axis so that the arm gets perfectly straight
+* (5) - get the resulted positions and store them as offsets them using `M665 S E`
+* (7) - home again using `G28 XY`
+* (8) - repeat (2)-(8) until perfect alignment is achieved
+* (9) - save the resulted values to EEPROM using `M500`
+
+> Note: bad alignment of shoulder axis will not result in deformed parts, but **improper positioning of the elbow axis will do**.
+> 
