@@ -1,6 +1,9 @@
 Calibration
 ===
-For the current alpha version of the firmware, the machine uses no endstops for the X and Y axis, so calibration must be done manually. The code has been modified so the machine can print and home without endstops, so this will work smoothly.
+> Deprecated for Firmware version 0.4. Soon to be updated.
+
+
+For the current 0.2 alpha version of the firmware, the machine uses no endstops for the X and Y axis, so calibration must be done manually. The code has been modified so the machine can print and home without endstops, so this will work smoothly.
 
 Step 1 - Set the machine in position
 ---

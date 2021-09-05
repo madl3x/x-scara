@@ -19,10 +19,19 @@ Check the [hardware section here](hardware/README.md) and if you want to check f
 Firmware
 ===
     Updates:
-    - X-SCARA firmware version is now 0.2 Alpha! 
-    - Homing and bed leveling will be available in the next version.
+    - X-SCARA firmware version is now 0.4 BETA!
+    - All basic functionality (homing, bed-leveling, tuning segmented movements) implemented & working
+    - Added coordinate transformation modes to support bed-leveling (`M360 M2` - probe mode)
+    - Implemented homing sequence `G28` 
+    - Modified UBL (Unified Bed Leveling) to support **X-SCARA**'s kinematic model
+    - Integrated bed-leveling support `G29`
+    - Applying bed leveling for planar moves when bed-leveling is activated
+    - Modified `M665` for configuring machine's settings
+    - EEPROM support to save most important configuration options
 
-For firmware build and configuration follow [these instructions](firmware/README.md), and if you are already using it check the [changelog](firmware/CHANGELOG.md) for any updates.
+For firmware build and configuration follow [these instructions](firmware/README.md).
+
+ if you are already using it check the [changelog](firmware/CHANGELOG.md) for any updates.
 
 Calibration procedure
 ===
