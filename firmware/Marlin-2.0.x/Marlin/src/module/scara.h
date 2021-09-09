@@ -44,7 +44,7 @@ extern xyz_pos_t scara_home_offset;
     #define X_SCARA_DEBUG_LNPAIR(V...) 
   #endif
 
-  #define X_SCARA_VERSION_STR "0.4 Beta"
+  #define X_SCARA_VERSION_STR "0.4.1 Beta"
 #endif//X_SCARA
 
 float constexpr L1 = SCARA_LINKAGE_1, L2 = SCARA_LINKAGE_2;

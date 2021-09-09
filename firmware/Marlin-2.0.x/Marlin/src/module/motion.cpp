@@ -362,7 +362,15 @@ void line_to_current_position(const feedRate_t &fr_mm_s/*=feedrate_mm_s*/) {
     #else
       if (current_position == destination) return;
 
-      planner.buffer_line(destination, scaled_fr_mm_s, active_extruder);
+      // Apply leveling to destination coordinate
+      #if HAS_LEVELING
+        xyze_pos_t raw = destination;
+        if (planner.leveling_active) planner.apply_leveling(raw);
+      #else
+        const xyze_pos_t raw = destination;
+      #endif//HAS_LEVELING
+
+      planner.buffer_line(raw, scaled_fr_mm_s, active_extruder);
     #endif
 
     current_position = destination;
