@@ -16,10 +16,11 @@ Linear and radial bearings
 * 5 x 608 radial bearings (OD/ID/T 22x8x7)
 
 Pulley and belts
-* 2 x 280 mm 2GT closed belt
+* 3 x 280 mm 2GT closed belt
 * 2 x 20 teeth 2GT inner bore 5 mm pulley (motor shaft) 
-* 2 x 20 teeth 2GT inner bore 5 mm idler
-* 2 x 20 teeth 2GT inner bore 5 mm idler without teeth
+* 1 x 20 teeth 2GT inner bore 8 mm pulley
+* 2 x 20 teeth 2GT inner bore 3 mm idler
+* 2 x 20 teeth 2GT inner bore 3 mm idler without teeth
 * 3 x 60 teeth 2GT inner bore 8 mm
 
 Screws and nuts
