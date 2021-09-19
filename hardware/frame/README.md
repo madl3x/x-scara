@@ -8,7 +8,7 @@ Each element marked with (Z) can be extended by a given offset if you intend to 
 Aluminum extrusions
 * 2 x 20x40 300mm aluminum profile (Z)
 * 2 x 20x20 130mm aluminum profile
-* 4 x 20x20 60mm aluminum profile 
+* 8 x 20x20 60mm aluminum profile 
 
 Brackets
 * 8 x 20x20 Corner Cast bracket 
