@@ -62,8 +62,8 @@ Printed parts
 | Arm_Shoulder_Plate_Bottom    | 1     |                                                                     |
 | Arm_SideWall_Left            | 1     |                                                                     |
 | Arm_SideWall_Right           | 1     |                                                                     |
-| Arm_Plates_Cover             | 1     |                                                                     |
-| Arm_Shoulder_Connector       | 1     | ![connector](images/parts/Arm_Shoulder_Connector.png)               |
+| Arm_Plates_Cover             | 2     |                                                                     |
+| Arm_Shoulder_Connector       | 2     | ![connector](images/parts/Arm_Shoulder_Connector.png)               |
 | **ELBOW**                    |       |                                                                     |
 | Arm_Elbow_Plate_Top          <td> 1<td rowspan=5> ![arm](images/parts/Arm_Elbow.png)                       |
 | Arm_Elbow_Plate_Bottom       | 1     |                                                                     |
