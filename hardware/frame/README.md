@@ -42,7 +42,7 @@ Printed parts
 | ---------------------------- | ----- | :-----------------------------------------------------------------: |
 | Frame_Plate_TipConnector     | 2     | ![tip](images/parts/Frame_Plate_TipConnector.png)                   |
 | Frame_Plate_Side_Left        <td> 2  <td rowspan=3> ![sides](images/parts/Frame_Plate_SideConnector.png)   |
-| Frame_Plate_Side_Right_      | 2     |
+| Frame_Plate_Side_Right       | 2     |
 | Frame_Plate_Side_RodClamp    | 4     |
 | Frame_Z_BearingPlate         <td> 1  <td rowspan=2> ![bearing](images/parts/Frame_ZBearing.png)            |
 | Frame_Z_BearingHolder        | 1     |
