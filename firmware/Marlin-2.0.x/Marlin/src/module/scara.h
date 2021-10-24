@@ -92,11 +92,11 @@ inline bool scara_position_is_reachable(const float &rx, const float &ry, const 
 
   /* X-SCARA  inline methods */
   FORCE_INLINE void x_scara_relative_to_delta(ab_pos_t & angles) {
-    angles.b += angles.a/3;
+    angles.b += angles.a/ELBOW_REDUCTION_RATIO;
   }
 
   FORCE_INLINE void x_scara_delta_to_relative(ab_pos_t & angles) {
-    angles.b -= angles.a/3;
+    angles.b -= angles.a/ELBOW_REDUCTION_RATIO;
   }
 
   /* X-SCARA functions */

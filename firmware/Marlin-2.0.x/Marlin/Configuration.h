@@ -815,6 +815,7 @@
  * E - adjust according to your extruder (93 is for MK8 extruder)
  */
 #define DEFAULT_AXIS_STEPS_PER_UNIT   { 26.666666666666667, 80, 400, 418.5 }
+#define ELBOW_REDUCTION_RATIO 3  // 60 % 20 = 3}
 
 /**
  * Default Max Feed Rate (mm/s)
