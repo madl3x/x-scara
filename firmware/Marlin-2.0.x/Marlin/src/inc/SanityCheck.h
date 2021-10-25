@@ -606,6 +606,9 @@ static_assert(Y_MAX_LENGTH >= Y_BED_SIZE, "Movement bounds (Y_MIN_POS, Y_MAX_POS
   #ifndef SCARA_OFFSET_Y
     #error "X-SCARA requires SCARA_OFFSET_Y to be defined (distance to center)"
   #endif
+  #ifndef X_SCARA_ELBOW_CROSSTALK_RATIO
+    #error "X-SCARA requires X_SCARA_ELBOW_CROSSTALK_RATIO to be defined"
+  #endif
   #if ENABLED(HAS_BED_PROBE) && !SCARA_PROBE_OFFSET_DEGREES
     #error "X-SCARA requires SCARA_PROBE_OFFSET_DEGREES to be defined (probe offset in degrees)"
   #endif

@@ -168,7 +168,7 @@ void forward_kinematics_SCARA(const float &a, const float &b) {
    * joint relative angles.
    */
   else if (x_scara_coordinates_mode == X_SCARA_COORDINATES_RELATIVE_ANGLES) {
-    cartes.set(a, b-a/3);
+    cartes.set(a, b-a/X_SCARA_ELBOW_CROSSTALK_RATIO);
   }
       
   #else
@@ -222,7 +222,7 @@ void inverse_kinematics(const xyz_pos_t &raw) {
   }
   /* X_SCARA_COORDINATES_RELATIVE_ANGLES - X,Y are now angles */
   else if (x_scara_coordinates_mode == X_SCARA_COORDINATES_RELATIVE_ANGLES) {
-    delta.set(raw.x, raw.y + raw.x/3, raw.z);
+    delta.set(raw.x, raw.y + raw.x/X_SCARA_ELBOW_CROSSTALK_RATIO, raw.z);
 
     X_SCARA_DEBUG_LNPAIR(
       "INVK X:",raw.x," Y:", raw.y, " -> S:", DEGREES(delta.a)," E:", DEGREES(delta.b));
@@ -339,7 +339,7 @@ void x_scara_run_gcode(_gcode_fn_t gcode_run){
 /* forward kinematics transformation */
 static  FORCE_INLINE void x_scara_fwdk(const float &a, const float &b) {
     const float S = a;
-    const float E = b-a/3;
+    const float E = b-a/X_SCARA_ELBOW_CROSSTALK_RATIO;
 
     const float a_sin = - sin(RADIANS(S)) * L1,
                 a_cos =   cos(RADIANS(S)) * L1,
@@ -365,7 +365,7 @@ static FORCE_INLINE void x_scara_invk(const xyz_pos_t &raw) {
     if(hypot == 0) hypot = 0.000001; // avoid division by zero
 
     float S = ATAN2(x,y) - ACOS((x2y2 + PK_DifLenSqrd )/(2*L1*hypot));
-    float E =              ACOS((x2y2 - PK_SumLenSq   )/(PK_ProdOfLen)) + S/3;
+    float E =              ACOS((x2y2 - PK_SumLenSq   )/(PK_ProdOfLen)) + S/X_SCARA_ELBOW_CROSSTALK_RATIO;
 
     delta.set(DEGREES(S), DEGREES(E), raw.z);
 
